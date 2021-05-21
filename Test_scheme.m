@@ -3,7 +3,7 @@ close all
 clc
 
 addpath('Resources') 
-%% Generate new folder
+%% Generate folder for results
 folder_name='Results/Prova'; %Name for the results folder: it should be named after the kind of test performed
 
 currDate = datestr(datetime,30);
