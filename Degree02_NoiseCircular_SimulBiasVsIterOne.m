@@ -26,6 +26,17 @@ r=[scale*(2*rand(N,1)-1)+scale*1i*(2*rand(N,1)-1)];
 % Compute corresponding noise-free polynomial cefficients
 a=conj(poly(r)');
 
+%% Compute the expected MSE matrix and bias from the analytic expression
+% MSE matrix (complex augmented)
+MSE_analytic=mse_analytic(r,a,Sigma);
+% MSE matrix (real composite)
+J=[eye(N) 1i*eye(N);eye(N) -1i*eye(N)]; % Notation change matrix
+MSE_analytic_tilda=1/4*J'*MSE_analytic*J;
+% bias (complex augmented)
+Bias_analytic=bias_analytic(r,a,Sigma);
+% bias (real composite)
+Bias_analytic_tilda=1/2*J'*Bias_analytic;
+
 %% Simulation
 h = waitbar(0,'Simulations in progress ... Please wait...');
 a_n=zeros(N+1,K); %Matrix to contain coefficients at every iteration
@@ -66,10 +77,10 @@ plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','
 for ii=1:N
     plot(real(r_n(ii,:)),imag(r_n(ii,:)),'.','MarkerSize',1); hold on; % Simulated roots
 end
-% for ii=1:N
-% %     Ellipse_plot(0.1*inv(Cov_ztilda([ii N+ii],[ii N+ii])),[real(avgs(ii))-real(bias(ii)),imag(avgs(ii))-imag(bias(ii))])
-%     Ellipse_plot(0.1*inv(Cov_ztilda([ii N+ii],[ii N+ii])),[real(r(ii)),imag(r(ii))])
-% end
+for ii=1:N
+%     Ellipse_plot(0.1*inv(Cov_ztilda([ii N+ii],[ii N+ii])),[real(avgs(ii))-real(bias(ii)),imag(avgs(ii))-imag(bias(ii))])
+    ellipse_plot(0.1*inv(MSE_analytic_tilda([ii N+ii],[ii N+ii])),[real(r(ii)),imag(r(ii))])
+end
 plot(real(r_mean),imag(r_mean),'.b','MarkerSize',15); % Mean of estimated roots
 plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
 axis equal;axis(3*[-1,1,-1,1]);
