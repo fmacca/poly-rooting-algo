@@ -4,7 +4,7 @@ clc
 
 addpath('Resources') 
 %% Generate folder for results
-folder_name='Results/Degree02_NoiseCircular_SimulBiasVsIterDecreasingDistance'; %Name for the results folder: it should be named after the kind of test performed
+folder_name='Results/Degree03_NoiseCircular_SimulBiasVsIterDecreasingDistance'; %Name for the results folder: it should be named after the kind of test performed
 
 currDate = datestr(datetime,30);
 mkdir(folder_name,currDate);
@@ -13,19 +13,22 @@ results_folder=strcat(folder_name,'/',currDate);
 %through figs(1)=figure(1); figs(2)=figure(2);
 
 %% Parameters
-N=2; % order of the polynomial
+N=3; % order of the polynomial
 sigma_a=.002; % variance of the noise on coefficients
 K=10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 D=6; % number of shortening steps
-distances=(1+1/4*randn(1))*(1/2).^(0:(D-1));
+distances=zeros(N-1,D);
+for ii=1:(N-1)
+    distances(ii,:)=(1+1/4*randn(1))*(1/2).^(0:(D-1));
+end
 
 %% Generate Polynomial and Covariance matrix
 % Generate a random circular covariance
 [Sigma,C_atilda,A] = generate_covariance(N,sigma_a,'circular');
-% Generate a random root and a random direction for the second root
+% Generate a random root and a random direction for the other roots
 r1=[scale*(2*rand(1,1)-1)+scale*1i*(2*rand(1,1)-1)];
-dir=rand(1)*2*pi;
+dir=rand(N-1,1)*2*pi;
 
 %% Simulation
 h = waitbar(0,'Simulations in progress ... Please wait...');
@@ -40,7 +43,7 @@ Bias_analytic_tilda=zeros(2*N,D);
 r=zeros(N,D);
 a=zeros(D,N+1); % Notice that here D and N are inverted!
 for d=1:D
-    r(:,d)=[r1; r1+distances(d)*exp(1i*dir)]; % Set the two roots
+    r(:,d)=[r1; r1+distances(:,d).*exp(1i*dir)]; % Set the N roots
     a(d,:)=conj(poly(r(:,d))'); % Compute corresponding noise-free polynomial cefficients
     % Compute the expected MSE matrix and bias from the analytic expression
     MSE_analytic(:,:,d)=mse_analytic(r(:,d),a(d,:),Sigma); % MSE matrix (complex augmented)
@@ -99,7 +102,7 @@ figs(2)=figure(2);
 subplot(1,1,1)
 leg1=[]; % leg2=[];
 for d=1:D
-    loglog(1:K,abs(cumsum(err_n(:,:,d),2))./[1:K;1:K]);
+    loglog(1:K,abs(cumsum(err_n(:,:,d),2))./repmat(1:K,N,1));
     title("Average error (cumulative) vs iteration");grid on; hold on;
     
     % Organizing Legend
