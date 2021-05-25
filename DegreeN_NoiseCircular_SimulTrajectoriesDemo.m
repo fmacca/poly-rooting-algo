@@ -4,7 +4,7 @@ clc
 
 addpath('Resources') 
 %% Generate folder for results
-folder_name='Results/Degree02_NoiseCircular_SimulTrajectoriesDemo'; %Name for the results folder: it should be named after the kind of test performed
+folder_name='Results/DegreeN_NoiseCircular_SimulTrajectoriesDemo'; %Name for the results folder: it should be named after the kind of test performed
 
 currDate = datestr(datetime,30);
 mkdir(folder_name,currDate);
@@ -13,11 +13,11 @@ results_folder=strcat(folder_name,'/',currDate);
 %through figs(1)=figure(1); figs(2)=figure(2);
 
 %% Parameters
-N=2; % order of the polynomial
+N=3; % order of the polynomial
 sigma_a=.01; % variance of the noise on coefficients
-K=20; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=100; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
-T=50; % Number of poits in each trajectory
+T=100; % Number of poits in each trajectory
 lambdas=linspace(0,1,T);
 
 %% Generate Polynomial and Covariance matrix
@@ -75,6 +75,7 @@ for k=1:K
     for t=1:T
         plot(real(r_n(1,k,t)),imag(r_n(1,k,t)),'r.','MarkerSize',1); hold on; % Simulated roots
         plot(real(r_n(2,k,t)),imag(r_n(2,k,t)),'b.','MarkerSize',1); hold on;
+        plot(real(r_n(3,k,t)),imag(r_n(3,k,t)),'g.','MarkerSize',1); hold on;
     end
 end
 plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
