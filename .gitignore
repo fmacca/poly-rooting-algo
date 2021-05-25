@@ -1,3 +1,4 @@
 # Ignore saved figures and workspaces
 *.mat
 *.fig
+*.asv
