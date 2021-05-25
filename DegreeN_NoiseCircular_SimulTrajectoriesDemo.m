@@ -13,9 +13,9 @@ results_folder=strcat(folder_name,'/',currDate);
 %through figs(1)=figure(1); figs(2)=figure(2);
 
 %% Parameters
-N=3; % order of the polynomial
+N=5; % order of the polynomial
 sigma_a=.01; % variance of the noise on coefficients
-K=100; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=50; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 T=100; % Number of poits in each trajectory
 lambdas=linspace(0,1,T);
@@ -26,7 +26,7 @@ lambdas=linspace(0,1,T);
 % Generate a random root and a random direction for the other roots
 r1=[scale*(2*rand(1,1)-1)+scale*1i*(2*rand(1,1)-1)];
 dir=rand(N-1,1)*2*pi;
-distance=(1+1/4*randn(1))*(1/2).^2;
+distance=(1+1/4*randn(1))*(1/2).^1;
 r=[r1; r1+distance.*exp(1i*dir)]; % Set the N roots
 % Compute corresponding noise-free polynomial cefficients
 a=conj(poly(r)');
@@ -76,6 +76,8 @@ for k=1:K
         plot(real(r_n(1,k,t)),imag(r_n(1,k,t)),'r.','MarkerSize',1); hold on; % Simulated roots
         plot(real(r_n(2,k,t)),imag(r_n(2,k,t)),'b.','MarkerSize',1); hold on;
         plot(real(r_n(3,k,t)),imag(r_n(3,k,t)),'g.','MarkerSize',1); hold on;
+        plot(real(r_n(4,k,t)),imag(r_n(4,k,t)),'y.','MarkerSize',1); hold on;
+        plot(real(r_n(5,k,t)),imag(r_n(5,k,t)),'c.','MarkerSize',1); hold on;
     end
 end
 plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
