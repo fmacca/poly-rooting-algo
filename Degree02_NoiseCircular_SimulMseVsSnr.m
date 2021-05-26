@@ -99,19 +99,28 @@ end
 
 figs(2)=figure(2);
 
+for ii=1:(2*N)
+    for jj=ii:(2*N)
+        subplot(2*N,2*N,(ii-1)*2*N+jj)
+        semilogy(SNR,abs(reshape(MSE_analytic_tilda(ii,jj,:),SNR_nsteps,1)),'-');hold on;
+        semilogy(SNR,abs(reshape(MSE_simulated_tilda(ii,jj,:),SNR_nsteps,1)),'o--');
+        legend([ strcat("analitic"); strcat("simulated")],'Location','southwest');
+        title(strcat("MSE_{",int2str(ii),int2str(jj),"} vs SNR"));grid on;
+    end
+end
+
+figs(3)=figure(3);
+
 subplot(1,1,1)
 leg1=[]; % leg2=[];
 for ii=1:(2*N)
     for jj=ii:(2*N)
-        semilogy(SNR,reshape(MSE_analytic_tilda(ii,jj,:),SNR_nsteps,1),'-');hold on;
-        semilogy(SNR,reshape(MSE_simulated_tilda(ii,jj,:),SNR_nsteps,1),'o--');
-        leg1 =[ leg1; strcat("MSE_{",int2str(ii),int2str(jj),"}; analitic"); strcat("MSE_{",int2str(ii),int2str(jj),"}; simulated")];
+        semilogy(SNR,abs(reshape(MSE_simulated_tilda(ii,jj,:),SNR_nsteps,1)-reshape(MSE_analytic_tilda(ii,jj,:),SNR_nsteps,1)),'o--'); hold on;
+        leg1 =[ leg1; strcat("Error(MSE_{",int2str(ii),int2str(jj),"})")];
     end
 end
 legend(leg1);
-title("MSE vs SNR");grid on;
-
-
+title("MSE error vs SNR");grid on;
 
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
