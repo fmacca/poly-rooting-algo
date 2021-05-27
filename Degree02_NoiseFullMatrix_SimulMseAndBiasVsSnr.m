@@ -133,13 +133,13 @@ for ii=1:N
     semilogy(SNR,abs(Bias_analytic_tilda(ii,:)),'-');hold on;
     semilogy(SNR,abs(Bias_simulated_tilda(ii,:)),'o--');
     legend([ strcat("analitic"); strcat("simulated")],'Location','southwest');
-    title(strcat("Abs(Bias_{",int2str(ii),int2str(jj),"}) vs SNR (real part)"));grid on;
+    title(strcat("Abs(Bias_{",int2str(ii),"}) vs SNR (real part)"));grid on;
     
     subplot(N,2,2+2*(ii-1))
     semilogy(SNR,abs(Bias_analytic_tilda(N+ii,:)),'-');hold on;
     semilogy(SNR,abs(Bias_simulated_tilda(N+ii,:)),'o--');
     legend([ strcat("analitic"); strcat("simulated")],'Location','southwest');
-    title(strcat("Abs(Bias_{",int2str(ii),int2str(jj),"}) vs SNR (imaginary part)"));grid on;
+    title(strcat("Abs(Bias_{",int2str(ii),"}) vs SNR (imaginary part)"));grid on;
 end
 
 figs(5)=figure(5);
@@ -148,7 +148,7 @@ subplot(1,1,1)
 leg1=[]; % leg2=[];
 for ii=1:(2*N)
     semilogy(SNR,abs(Bias_analytic_tilda(ii,:)-Bias_simulated_tilda(ii,:)),'o--'); hold on;
-    leg1 =[ leg1; strcat("Error(Bias_{",int2str(ii),int2str(jj),"})")];
+    leg1 =[ leg1; strcat("Error(Bias_{",int2str(ii),"})")];
 end
 legend(leg1);
 title("Bias error vs SNR");grid on;
