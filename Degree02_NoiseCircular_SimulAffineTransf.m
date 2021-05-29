@@ -14,7 +14,7 @@ results_folder=strcat(folder_name,'/',currDate);
 
 %% Parameters
 N=2; % order of the polynomial
-sigma_a=.01; % variance of the noise on coefficients
+sigma_a=.1; % variance of the noise on coefficients
 K=10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 
