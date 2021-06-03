@@ -37,11 +37,15 @@ MSE_analytic=zeros(2*N,2*N,D);
 MSE_analytic_tilda=zeros(2*N,2*N,D);
 Bias_analytic=zeros(2*N,D);
 Bias_analytic_tilda=zeros(2*N,D);
+% MSE_simulated=zeros(2*N,2*N,D);
+% MSE_simulated_tilda=zeros(2*N,2*N,D);
+Discriminants=zeros(D,1);
 r=zeros(N,D);
 a=zeros(D,N+1); % Notice that here D and N are inverted!
 for d=1:D
     r(:,d)=[r1; r1+distances(d)*exp(1i*dir)]; % Set the two roots
     a(d,:)=conj(poly(r(:,d))'); % Compute corresponding noise-free polynomial cefficients
+    Discriminants(d)=a(d,2)^2/4+a(d,3); % Compute the discriminant of noise free polynomial
     % Compute the expected MSE matrix and bias from the analytic expression
     MSE_analytic(:,:,d)=mse_analytic(r(:,d),a(d,:),Sigma); % MSE matrix (complex augmented)
     MSE_analytic_tilda(:,:,d)=1/4*J'*MSE_analytic(:,:,d)*J; % MSE matrix (real composite)
@@ -56,6 +60,8 @@ for d=1:D
 
         waitbar(((d-1)*K+k)/(K*D)) %Update waitbar
     end
+%     MSE_simulated(:,:,d)=1/K*[err_n(:,:,d); conj(err_n(:,:,d))]*[err_n(:,:,d); conj(err_n(:,:,d))]';
+%     MSE_simulated_tilda(:,:,d)=1/4*J'*MSE_simulated(:,:,d)*J;
 end
 r_mean = mean(r_n,2); %Mean of the roots computed at every iteration
 
@@ -109,6 +115,24 @@ for d=1:D
     end
 end
 legend(leg1);
+
+% figs(3)=figure(3);
+% 
+% for ii=1:(2*N)
+%     for jj=ii:(2*N)
+%         subplot(2*N,2*N,(ii-1)*2*N+jj)
+%         loglog(distances,abs(reshape(MSE_analytic_tilda(ii,jj,:),D,1)),'-');hold on;
+%          loglog(distances,abs(reshape(MSE_simulated_tilda(ii,jj,:),D,1)),'o--');
+%         legend([ strcat("analitic"); strcat("simulated")],'Location','southwest');
+%         title(strcat("MSE_{",int2str(ii),int2str(jj),"} vs Distances"));grid on;
+%     end
+% end
+
+figs(3)=figure(3);
+
+plot(distances,abs(Discriminants),'o--');
+grid on
+title("Abs(Discriminant) vs distance");
 
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
