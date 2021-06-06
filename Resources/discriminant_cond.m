@@ -1,7 +1,10 @@
-function [cd] = discriminant_cond(a)
+function [discr,cnd] = discriminant_cond(a)
 %DISCRIMINANT_COND The function returns the conditional number of the discriminant
 %matrix
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
+N=length(a)-1;
+D=[convmtx(a',N-1);convmtx(polyder(a),N)]; %Discriminant matrix
+cnd=cond(D); %Conditional number of discriminant matrix
+discr=det(D); %Discriminant
+
 end
 
