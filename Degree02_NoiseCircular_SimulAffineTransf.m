@@ -22,7 +22,11 @@ scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-s
 % Generate a random circular covariance
 [Sigma,C_atilda,A] = generate_covariance(N,sigma_a,'circular');
 % Generate "roots of 1" polynomial
-a=[1.0000 + 0.0000i;   2.5880 - 0.3628i;   1.6431 - 0.4871i];
+%a=[1.0000 + 0.0000i;   2.5880 - 0.3628i;   1.6431 - 0.4871i];
+%a=[1.0000 + 0.0000i;   0;   -1];
+%a=[1.0000 + 0.0000i;   0;   -0.5];
+%a=[1.0000 + 0.0000i;   0;   -0.001];
+a=[1.0000 + 0.0000i;   0;   -0.25];
 % Generate random roots
 r=roots(a);
 [a_transf,~]=poly2D_affinetransf(a);
@@ -143,6 +147,6 @@ axis equal;axis(5*[-1,1,-1,1]);
 title("Roots of the original polynomial");grid on;hold off
 
 %% Save workspace and figures to the folder
-savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
-clear figs
-save(strcat(results_folder,'/workspace'));
+% savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
+% clear figs
+% save(strcat(results_folder,'/workspace'));
