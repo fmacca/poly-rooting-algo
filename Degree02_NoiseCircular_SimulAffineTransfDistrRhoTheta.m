@@ -23,10 +23,11 @@ scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-s
 [Sigma,C_atilda,A] = generate_covariance(N,sigma_a,'circular');
 % Generate polynomial
 %a=[1.0000 + 0.0000i;   2.5880 - 0.3628i;   1.6431 - 0.4871i];
-%a=[1.0000 + 0.0000i;   0;   -1];
-%a=[1.0000 + 0.0000i;   0;   -0.5];
+% a=[1.0000 + 0.0000i;   0;   -1];
+% a=[1.0000 + 0.0000i;   0;   -0.5];
 %a=[1.0000 + 0.0000i;   0;   -0.001];
-a=[1.0000 + 0.0000i;   0;   -0.25];
+% a=[1.0000 + 0.0000i;   0;   -0.25];
+a=[1.0000 + 0.0000i;   0;   0];
 % Generate random roots
 r=roots(a);
 [a_transf,~]=poly2D_affinetransf(a);
@@ -44,8 +45,10 @@ r_n_transf=zeros(N,K); %Matrix to collect roots computed from transformation at 
 % r_n_retransf=zeros(N,K); %Matrix to collect roots retrasformed back
 % err_n=zeros(N,K); %Matrix to collect the error in roots at every step
 for k=1:K
-    noise_tilda=A*randn(2*N,1); %Generate colored noise
-    a_n(:,k)=a+[0;noise_tilda(1:N)+1i*noise_tilda(N+1:2*N)]; %Add noise to coefficients
+%     noise_tilda=A*randn(2*N,1); %Generate colored noise
+    noise_tilda=randn(2*N,1);
+%     a_n(:,k)=a+[0;noise_tilda(1:N)+1i*noise_tilda(N+1:2*N)];
+    a_n(:,k)=a+[0;noise_tilda(1)+1i*noise_tilda(N);0];%Add noise to coefficients
     [a_n_transf(:,k),t(k)] = poly2D_affinetransf(a_n(:,k)); %Collect the transformed polynomials
     r_curr=roots(a_n_transf(:,k)); %Compute the roots
     r_n_transf(:,k)=r_curr(order_roots_permutations(r_curr,r_transf)); %Save roots ordered w.r.t. original roots
