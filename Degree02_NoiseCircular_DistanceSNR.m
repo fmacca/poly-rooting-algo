@@ -75,6 +75,7 @@ for d=1:D
     
 end
 r_mean = mean(r_n,2); %Mean of the roots computed at every iteration
+err_mean = mean(err_n,2); %Mean of the error computed at every iteration
 close(h); %Close waitbar
 
 %% Plots
@@ -131,6 +132,25 @@ for d=1:D
 end
 sgtitle("Roots distributions");
 
+%%
+figs(4)=figure(4);
+
+for d=1:D
+    for ii=1:SNR_nsteps
+        subplot(SNR_nsteps,D,d+(ii-1)*D);
+        viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
+        plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
+        for jj=1:N
+            plot(real(err_n(jj,:,d,ii)),imag(err_n(jj,:,d,ii)),'.','MarkerSize',1); hold on; % Simulated roots
+        end
+        plot(real(err_mean(:,:,d,ii)),imag(err_mean(:,:,d,ii)),'.b','MarkerSize',15); % Mean of estimated roots
+        
+%         axis equal;axis([min(min(real(r_n(1,:,d,ii))),min(real(r_n(2,:,d,ii)))),max(max(real(r_n(1,:,d,ii))),max(real(r_n(2,:,d,ii)))),min(min(imag(r_n(1,:,d,ii))),min(imag(r_n(2,:,d,ii)))),max(max(imag(r_n(1,:,d,ii))),max(imag(r_n(2,:,d,ii))))]);
+        axis equal;
+        title(strcat("dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
+    end
+end
+sgtitle("Error distributions");
 
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
