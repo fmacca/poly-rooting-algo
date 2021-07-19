@@ -31,7 +31,6 @@ r1=[scale*(2*rand(1,1)-1)+scale*1i*(2*rand(1,1)-1)];
 dir=rand(1)*2*pi;
 
 %% Simulation
-h = waitbar(0,'Simulations in progress ... Please wait...');
 Delta_n=zeros(K,D,SNR_nsteps); % Matrix to contain the discriminant at every iteration
 J=[eye(N) 1i*eye(N);eye(N) -1i*eye(N)]; % Notation change matrix
 r=zeros(N,D); % Exact roots
@@ -47,7 +46,10 @@ MSE_analytic_tilda=zeros(2*N,2*N,D,SNR_nsteps);
 MSE_simulated=zeros(2*N,2*N,D,SNR_nsteps);
 MSE_simulated_tilda=zeros(2*N,2*N,D,SNR_nsteps);
 
+Gaussianity_test_n=zeros(N,D,SNR_nsteps); % Matrices to collect the result of Roystest_mod
+
 for d=1:D
+    h = waitbar(0,strcat('Simulations in progress ... Please wait ... ',int2str(d),'/',int2str(D),' ...'));
     r(:,d)=[r1+distances(d)/2*exp(1i*dir); r1-distances(d)/2*exp(1i*dir)]; % Set the two roots
     a(d,:)=conj(poly(r(:,d))'); % Compute corresponding noise-free polynomial cefficients
     
@@ -71,12 +73,15 @@ for d=1:D
         end
         MSE_simulated(:,:,d,ii)=1/K*[err_n(:,:,d,ii); conj(err_n(:,:,d,ii))]*[err_n(:,:,d,ii); conj(err_n(:,:,d,ii))]';
         MSE_simulated_tilda(:,:,d,ii)=1/4*J'*MSE_simulated(:,:,d,ii)*J;
+        
+        Gaussianity_test_n(1,d,ii)=Roystest_mod([real(r_n(1,:,d,ii))' imag(r_n(1,:,d,ii))']);
+        Gaussianity_test_n(2,d,ii)=Roystest_mod([real(r_n(2,:,d,ii))' imag(r_n(2,:,d,ii))']);
     end
-    
+    close(h); %Close waitbar
 end
 r_mean = mean(r_n,2); %Mean of the roots computed at every iteration
 err_mean = mean(err_n,2); %Mean of the error computed at every iteration
-close(h); %Close waitbar
+
 
 %% Plots
 figs(1)=figure(1);
@@ -101,9 +106,13 @@ for d=1:D
         plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
         
         plot(real(Delta_n(:,d,ii)),imag(Delta_n(:,d,ii)),'.','MarkerSize',1); hold on; % Simulated coeff
-                
+        
+        color="";% We color with red the title if the P-Value is less than confidence level
+        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<0.05)
+            color="\color{red}";
+        end
         axis equal;%axis([min(real(Delta_n(:,d,ii))),max(real(Delta_n(:,d,ii))),min(imag(Delta_n(:,d,ii))),max(imag(Delta_n(:,d,ii)))]);
-        title(strcat("dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Discriminant distribution");
@@ -126,8 +135,12 @@ for d=1:D
         plot(real(r_mean(:,:,d,ii)),imag(r_mean(:,:,d,ii)),'.b','MarkerSize',15); % Mean of estimated roots
         plot(real(r(:,d)),imag(r(:,d)),'*k','MarkerSize',20); % True roots
 %         axis equal;axis([min(min(real(r_n(1,:,d,ii))),min(real(r_n(2,:,d,ii)))),max(max(real(r_n(1,:,d,ii))),max(real(r_n(2,:,d,ii)))),min(min(imag(r_n(1,:,d,ii))),min(imag(r_n(2,:,d,ii)))),max(max(imag(r_n(1,:,d,ii))),max(imag(r_n(2,:,d,ii))))]);
+        color="";% We color with red the title if the P-Value is less than confidence level
+        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<0.05)
+            color="\color{red}";
+        end
         axis equal;
-        title(strcat("dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Roots distributions");
@@ -146,11 +159,103 @@ for d=1:D
         plot(real(err_mean(:,:,d,ii)),imag(err_mean(:,:,d,ii)),'.b','MarkerSize',15); % Mean of estimated roots
         
 %         axis equal;axis([min(min(real(r_n(1,:,d,ii))),min(real(r_n(2,:,d,ii)))),max(max(real(r_n(1,:,d,ii))),max(real(r_n(2,:,d,ii)))),min(min(imag(r_n(1,:,d,ii))),min(imag(r_n(2,:,d,ii)))),max(max(imag(r_n(1,:,d,ii))),max(imag(r_n(2,:,d,ii))))]);
+        color="";% We color with red the title if the P-Value is less than confidence level
+        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<0.05)
+            color="\color{red}";
+        end
         axis equal;
-        title(strcat("dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Error distributions");
+
+%%
+figs(5)=figure(5);
+
+leg=[];
+for d=1:D
+    subplot(1,2,1);
+    plot(SNR,abs(reshape(err_mean(1,:,d,:),SNR_nsteps,1)),'o--');hold on;
+    leg=[leg; strcat("dist = ",num2str(distances(d)))];
+    legend(leg,'Location','northeast');
+    title("Average error on root 1 vs SNR");grid on;
+    
+    subplot(1,2,2);
+    plot(SNR,abs(reshape(err_mean(2,:,d,:),SNR_nsteps,1)),'o--');hold on;
+    legend(leg,'Location','northeast');
+    title("Average error on root 2 vs SNR");grid on;
+end
+for d=1:D
+    for ii=1:SNR_nsteps
+        subplot(1,2,1);
+        if Gaussianity_test_n(1,d,ii)<0.05
+            plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
+        end
+        
+
+        subplot(1,2,2);
+        if Gaussianity_test_n(1,d,ii)<0.05
+            plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
+        end
+    end
+end
+
+%%
+figs(6)=figure(6);
+
+leg=[];
+for d=1:D
+    subplot(1,2,1);
+    semilogy(SNR,abs(reshape(err_mean(1,:,d,:),SNR_nsteps,1)),'o--');hold on;
+    leg=[leg; strcat("dist = ",num2str(distances(d)))];
+    legend(leg,'Location','northeast');
+    title("Average error on root 1 vs SNR");grid on;
+    
+    subplot(1,2,2);
+    semilogy(SNR,abs(reshape(err_mean(2,:,d,:),SNR_nsteps,1)),'o--');hold on;
+    legend(leg,'Location','northeast');
+    title("Average error on root 2 vs SNR");grid on;
+end
+for d=1:D
+    for ii=1:SNR_nsteps
+        subplot(1,2,1);
+        if Gaussianity_test_n(1,d,ii)<0.05
+            plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
+        end
+        
+
+        subplot(1,2,2);
+        if Gaussianity_test_n(1,d,ii)<0.05
+            plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
+        end
+    end
+end
+
+%%
+figs(7)=figure(7);
+
+for d=1:D
+    leg1=[]; leg2=[];
+    for ii=1:SNR_nsteps
+        subplot(2,D,d)
+        loglog(1:K,abs(cumsum(err_n(1,:,d,ii),2))./repmat(1:K,1,1));
+        title(strcat("Root 1, dist = ",num2str(distances(d))));grid on; hold on;
+        if d==1
+            leg1=[leg1; strcat("SNR = ",int2str(SNR(ii)))];
+            legend(leg1,'Location','northeast');
+        end
+        
+        subplot(2,D,D+d)
+        loglog(1:K,abs(cumsum(err_n(2,:,d,ii),2))./repmat(1:K,1,1));
+        title(strcat("Root 2, dist = ",num2str(distances(d))));grid on; hold on;
+        if d==1
+            leg2=[leg2; strcat("SNR = ",int2str(SNR(ii)))];
+            legend(leg2,'Location','northeast');
+        end
+
+    end
+end
+sgtitle("Cumulative error at each iteration");
 
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
