@@ -32,7 +32,8 @@ r=roots(a);
 h = waitbar(0,'Simulations in progress ... Please wait...');
 a_n=zeros(N+1,K,T); %Matrix to contain coefficients at every iteration
 r_n=zeros(N,K,T); %Matrix to collect roots computed at every iteration
-a_mod=[1; 0; -1+0.5*1i];%[1; 0; 1.5+0.5*1i]; %Add noise to coefficients
+a_mod=[1; 0; 0.5+0.5*1i];%[1; 0; 1.5+0.5*1i]; %Add noise to coefficients
+r_mod=roots(a_mod);
 r_prec=r;
 a_n(:,1,:)=curved_trajectory1_vector(a,a_mod,lambdas);
 a_n(:,2,:)=curved_trajectory2_vector(a,a_mod,lambdas);
@@ -53,31 +54,35 @@ close(h); %Close waitbar
 figs(1)=figure(1);
 
 subplot(1,2,1);
-viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
+%viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);
+hold on;
 plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
 for k=1:K
     for ii=2:N+1
-        plot(real(reshape(a_n(ii,k,:),[1,T])),imag(reshape(a_n(ii,k,:),[1,T])),'.','MarkerSize',1); hold on; % Simulated coeff
+        plot(real(reshape(a_n(ii,k,:),[1,T])),imag(reshape(a_n(ii,k,:),[1,T])),'.','MarkerSize',5); hold on; % Simulated coeff
     end
 end
 % for ii=1:N
 %     ellipse_plot(0.1*inv(C_atilda([ii N+ii],[ii N+ii])),[real(a(1+ii)),imag(a(1+ii))])
 % end
 plot(real(a),imag(a),'*k','MarkerSize',20);
-axis equal;axis(5*[-1,1,-1,1]);
+plot(real(a_mod(3)),imag(a_mod(3)),'*g','MarkerSize',20);
+axis equal;axis(1.5*[-1,1,-1,1]);
 title("Coefficients");grid on;hold off
 
 subplot(1,2,2);
-viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
+%viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);
+hold on;
 plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
 for k=1:K
     for t=1:T
-        plot(real(r_n(1,k,t)),imag(r_n(1,k,t)),'r.','MarkerSize',1); hold on; % Simulated roots
-        plot(real(r_n(2,k,t)),imag(r_n(2,k,t)),'b.','MarkerSize',1); hold on;
+        plot(real(r_n(1,k,t)),imag(r_n(1,k,t)),'r.','MarkerSize',5); hold on; % Simulated roots
+        plot(real(r_n(2,k,t)),imag(r_n(2,k,t)),'b.','MarkerSize',5); hold on;
     end
 end
 plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
-axis equal;axis(3*[-1,1,-1,1]);
+plot(real(r_mod),imag(r_mod),'*g','MarkerSize',20); % Modified roots
+axis equal;axis(1.5*[-1,1,-1,1]);
 title("Roots");grid on;hold off
 
 %% Save workspace and figures to the folder

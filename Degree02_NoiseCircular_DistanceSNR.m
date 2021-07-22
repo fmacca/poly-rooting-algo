@@ -18,10 +18,12 @@ N=2; % order of the polynomial
 SNR = [0:12:36];
 SNRlin = 10.^(SNR/10); %(sqrt(1/SNRlin(isnr)))
 SNR_nsteps=numel(SNR);
-K=10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=2*10^3; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 D=4; % number of shortening steps
 distances=abs((4+randn(1))*(1/2).^(0:(D-1)));
+
+confidence=0.05; % Confidence level for normality testing
 
 %% Generate Polynomial and Covariance matrix
 % Generate a random circular covariance
@@ -91,7 +93,11 @@ viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
 plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
 
 % plot(real(r_mean(:,:,d)),imag(r_mean(:,:,d)),'.b','MarkerSize',15); % Mean of estimated roots
+
+plot([real(r(1,:)) real(r(2,:))],[imag(r(1,:)) imag(r(2,:))],'-c'); % Direction
+plot(real(r1),imag(r1),'xr','MarkerSize',10); % Baricenter
 plot(real(r(1,:)),imag(r(1,:)),'.b','MarkerSize',10); % True roots
+plot(real(r(2,:)),imag(r(2,:)),'.r','MarkerSize',10); % True roots
 plot(real(r(2,:)),imag(r(2,:)),'.r','MarkerSize',10); % True roots
 axis equal;axis([real(r1)-max(distances),real(r1)+max(distances),imag(r1)-max(distances),imag(r1)+max(distances)]);
 title("Roots");grid on;hold off
@@ -108,7 +114,7 @@ for d=1:D
         plot(real(Delta_n(:,d,ii)),imag(Delta_n(:,d,ii)),'.','MarkerSize',1); hold on; % Simulated coeff
         
         color="";% We color with red the title if the P-Value is less than confidence level
-        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<0.05)
+        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<confidence)
             color="\color{red}";
         end
         axis equal;%axis([min(real(Delta_n(:,d,ii))),max(real(Delta_n(:,d,ii))),min(imag(Delta_n(:,d,ii))),max(imag(Delta_n(:,d,ii)))]);
@@ -136,7 +142,7 @@ for d=1:D
         plot(real(r(:,d)),imag(r(:,d)),'*k','MarkerSize',20); % True roots
 %         axis equal;axis([min(min(real(r_n(1,:,d,ii))),min(real(r_n(2,:,d,ii)))),max(max(real(r_n(1,:,d,ii))),max(real(r_n(2,:,d,ii)))),min(min(imag(r_n(1,:,d,ii))),min(imag(r_n(2,:,d,ii)))),max(max(imag(r_n(1,:,d,ii))),max(imag(r_n(2,:,d,ii))))]);
         color="";% We color with red the title if the P-Value is less than confidence level
-        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<0.05)
+        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<confidence)
             color="\color{red}";
         end
         axis equal;
@@ -160,7 +166,7 @@ for d=1:D
         
 %         axis equal;axis([min(min(real(r_n(1,:,d,ii))),min(real(r_n(2,:,d,ii)))),max(max(real(r_n(1,:,d,ii))),max(real(r_n(2,:,d,ii)))),min(min(imag(r_n(1,:,d,ii))),min(imag(r_n(2,:,d,ii)))),max(max(imag(r_n(1,:,d,ii))),max(imag(r_n(2,:,d,ii))))]);
         color="";% We color with red the title if the P-Value is less than confidence level
-        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<0.05)
+        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<confidence)
             color="\color{red}";
         end
         axis equal;
@@ -188,13 +194,13 @@ end
 for d=1:D
     for ii=1:SNR_nsteps
         subplot(1,2,1);
-        if Gaussianity_test_n(1,d,ii)<0.05
+        if Gaussianity_test_n(1,d,ii)<confidence
             plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
         end
         
 
         subplot(1,2,2);
-        if Gaussianity_test_n(1,d,ii)<0.05
+        if Gaussianity_test_n(1,d,ii)<confidence
             plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
         end
     end
@@ -219,13 +225,13 @@ end
 for d=1:D
     for ii=1:SNR_nsteps
         subplot(1,2,1);
-        if Gaussianity_test_n(1,d,ii)<0.05
+        if Gaussianity_test_n(1,d,ii)<confidence
             plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
         end
         
 
         subplot(1,2,2);
-        if Gaussianity_test_n(1,d,ii)<0.05
+        if Gaussianity_test_n(1,d,ii)<confidence
             plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
         end
     end
