@@ -53,7 +53,7 @@ close(h); %Close waitbar
 %% Plots
 figs(1)=figure(1);
 
-subplot(1,2,1);
+subplot(1,3,1);
 %viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);
 hold on;
 plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
@@ -70,11 +70,26 @@ plot(real(a_mod(3)),imag(a_mod(3)),'*g','MarkerSize',20);
 axis equal;axis(1.5*[-1,1,-1,1]);
 title("Coefficients");grid on;hold off
 
-subplot(1,2,2);
+subplot(1,3,2);
 %viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);
 hold on;
 plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
-for k=1:K
+for k=1
+    for t=1:T
+        plot(real(r_n(1,k,t)),imag(r_n(1,k,t)),'r.','MarkerSize',5); hold on; % Simulated roots
+        plot(real(r_n(2,k,t)),imag(r_n(2,k,t)),'b.','MarkerSize',5); hold on;
+    end
+end
+plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
+plot(real(r_mod),imag(r_mod),'*g','MarkerSize',20); % Modified roots
+axis equal;axis(1.5*[-1,1,-1,1]);
+title("Roots");grid on;hold off
+
+subplot(1,3,3);
+%viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);
+hold on;
+plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
+for k=2
     for t=1:T
         plot(real(r_n(1,k,t)),imag(r_n(1,k,t)),'r.','MarkerSize',5); hold on; % Simulated roots
         plot(real(r_n(2,k,t)),imag(r_n(2,k,t)),'b.','MarkerSize',5); hold on;
