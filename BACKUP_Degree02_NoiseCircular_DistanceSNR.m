@@ -34,11 +34,9 @@ dir=rand(1)*2*pi;
 
 %% Simulation
 Delta_n=zeros(K,D,SNR_nsteps); % Matrix to contain the discriminant at every iteration
-Delta_exact=zeros(D,1); % Matrix to contain the discriminant of exact polynomials
 J=[eye(N) 1i*eye(N);eye(N) -1i*eye(N)]; % Notation change matrix
 r=zeros(N,D); % Exact roots
 a=zeros(D,N+1); % Exact coefficients
-eig_dom=zeros(1,SNR_nsteps); % Matrix to store dominant eigenvalue of sigma_a^2*Sigma
 
 r_n=zeros(N,K,D,SNR_nsteps); %Matrix to collect roots computed at every iteration
 
@@ -56,11 +54,9 @@ for d=1:D
     h = waitbar(0,strcat('Simulations in progress ... Please wait ... ',int2str(d),'/',int2str(D),' ...'));
     r(:,d)=[r1+distances(d)/2*exp(1i*dir); r1-distances(d)/2*exp(1i*dir)]; % Set the two roots
     a(d,:)=conj(poly(r(:,d))'); % Compute corresponding noise-free polynomial cefficients
-    Delta_exact(d)=poly2D_discriminant(a(d,:));
+    
     for ii=1:SNR_nsteps
         sigma_a=(sqrt(1/SNRlin(ii)));
-        % Compute dominant eigenvalue of the covariance matrix
-        eig_dom(ii)=max(abs(sigma_a^2*eig(A'*A)*2));
         % Compute the expected MSE matrix and bias from the analytic expression
         MSE_analytic(:,:,d,ii)=mse_analytic(r(:,d),a(d,:),sigma_a^2*Sigma); % MSE matrix (complex augmented)
         MSE_analytic_tilda(:,:,d,ii)=1/4*J'*MSE_analytic(:,:,d,ii)*J; % MSE matrix (real composite)
@@ -88,7 +84,6 @@ end
 r_mean = mean(r_n,2); %Mean of the roots computed at every iteration
 err_mean = mean(err_n,2); %Mean of the error computed at every iteration
 
-discr_eig_ratio=abs(Delta_exact)./eig_dom %An interesting table to look at! discriminant/dominant_eigenvalue
 
 %% Plots
 figs(1)=figure(1);
@@ -123,7 +118,7 @@ for d=1:D
             color="\color{red}";
         end
         axis equal;%axis([min(real(Delta_n(:,d,ii))),max(real(Delta_n(:,d,ii))),min(imag(Delta_n(:,d,ii))),max(imag(Delta_n(:,d,ii)))]);
-        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Discriminant distribution");
@@ -151,7 +146,7 @@ for d=1:D
             color="\color{red}";
         end
         axis equal;
-        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Roots distributions");
@@ -175,7 +170,7 @@ for d=1:D
             color="\color{red}";
         end
         axis equal;
-        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Error distributions");
