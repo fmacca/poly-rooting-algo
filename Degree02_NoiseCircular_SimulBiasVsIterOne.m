@@ -15,7 +15,7 @@ results_folder=strcat(folder_name,'/',currDate);
 %% Parameters
 N=2; % order of the polynomial
 sigma_a=.01; % variance of the noise on coefficients
-K=10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=10^6;%10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 
 %% Generate Polynomial and Covariance matrix
@@ -58,7 +58,7 @@ close(h); %Close waitbar
 %% Plots
 figs(1)=figure(1);
 
-subplot(2,2,1);
+% subplot(2,2,1);
 viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
 plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
 for ii=2:N+1
@@ -71,7 +71,8 @@ plot(real(a),imag(a),'*k','MarkerSize',20);
 axis equal;axis(5*[-1,1,-1,1]);
 title("Coefficients");grid on;hold off
 
-subplot(2,2,2);
+figs(2)=figure(2);
+% subplot(2,2,2);
 viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
 plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
 for ii=1:N
@@ -83,12 +84,13 @@ for ii=1:N
 end
 plot(real(r_mean),imag(r_mean),'.b','MarkerSize',15); % Mean of estimated roots
 plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
-axis equal;axis(3*[-1,1,-1,1]);
+axis equal;axis(2*[-1,1,-1,1]);
 title("Roots");grid on;hold off
 
-subplot(2,2,[3 4])
+figs(3)=figure(3);
+% subplot(2,2,[3 4])
 loglog(1:K,abs(cumsum(err_n,2))./[1:K;1:K]);
-title("Average error (cumulative) vs iteration");grid on
+title("Average error vs iteration");grid on
 % Organizing Legend
 leg1=[]; % leg2=[];
 for ii=1:N
