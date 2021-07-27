@@ -67,8 +67,8 @@ close(h); %Close waitbar
 %% Plots
 figs(1)=figure(1);
 D=SNR_nsteps;
-for d=1:SNR_nsteps
-    subplot(4,D/2,d);
+for d=1:3:SNR_nsteps
+    subplot(2,D/3,(d-1)/3+1);
     viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
     plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
     for ii=2:N+1
@@ -78,10 +78,10 @@ for d=1:SNR_nsteps
 %         ellipse_plot(0.1*inv(C_atilda([ii N+ii],[ii N+ii])),[real(a(1+ii)),imag(a(1+ii))])
 %     end
     plot(real(a),imag(a),'*k','MarkerSize',20);
-    axis equal;axis(5*[-1,1,-1,1]);
-    title("Coefficients");grid on;hold off
+    axis equal;axis(3*[-1,1,-1,1]);
+    title(strcat("Coefficients, SNR = ",num2str(SNR(d))));grid on;hold off
 
-    subplot(4,D/2,D+d);
+    subplot(2,D/3,D/3+(d-1)/3+1);
     viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
     plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
     for ii=1:N
@@ -93,8 +93,8 @@ for d=1:SNR_nsteps
     end
     plot(real(r_mean(:,:,d)),imag(r_mean(:,:,d)),'.b','MarkerSize',15); % Mean of estimated roots
     plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
-    axis equal;axis(3*[-1,1,-1,1]);
-    title("Roots");grid on;hold off
+    axis equal;axis(2*[-1,1,-1,1]);
+    title(strcat("Roots, SNR = ",num2str(SNR(d))));grid on;hold off
 end
 
 figs(2)=figure(2);
@@ -104,8 +104,10 @@ for ii=1:(2*N)
         subplot(2*N,2*N,(ii-1)*2*N+jj)
         semilogy(SNR,abs(reshape(MSE_analytic_tilda(ii,jj,:),SNR_nsteps,1)),'-');hold on;
         semilogy(SNR,abs(reshape(MSE_simulated_tilda(ii,jj,:),SNR_nsteps,1)),'o--');
-        legend([ strcat("analitic"); strcat("simulated")],'Location','southwest');
-        title(strcat("MSE_{",int2str(ii),int2str(jj),"} vs SNR"));grid on;
+        if(ii==1 &jj==1)
+            legend([ strcat("analytic"); strcat("simulated")],'Location','southwest');
+        end
+        title(strcat("$\widetilde{MSE}_{",int2str(ii),int2str(jj),"}$ vs SNR"), 'Interpreter', 'LaTeX');grid on;
     end
 end
 
