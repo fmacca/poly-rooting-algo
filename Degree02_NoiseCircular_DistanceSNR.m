@@ -18,7 +18,7 @@ N=2; % order of the polynomial
 SNR = [0:12:36];
 SNRlin = 10.^(SNR/10); %(sqrt(1/SNRlin(isnr)))
 SNR_nsteps=numel(SNR);
-K=10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=10^4;%10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
 K_normaltest=2*10^3; % Number of iterations to be used for normality test
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 D=4; % number of shortening steps
@@ -51,7 +51,7 @@ MSE_analytic_tilda=zeros(2*N,2*N,D,SNR_nsteps);
 MSE_simulated=zeros(2*N,2*N,D,SNR_nsteps);
 MSE_simulated_tilda=zeros(2*N,2*N,D,SNR_nsteps);
 
-Gaussianity_test_n=zeros(N,D,SNR_nsteps); % Matrices to collect the result of Roystest_mod
+Gaussianity_test_n=zeros(D,SNR_nsteps); % Matrices to collect the result of HZmvntest_mod
 
 for d=1:D
     h = waitbar(0,strcat('Simulations in progress ... Please wait ... ',int2str(d),'/',int2str(D),' ...'));
@@ -81,8 +81,9 @@ for d=1:D
         MSE_simulated(:,:,d,ii)=1/K*[err_n(:,:,d,ii); conj(err_n(:,:,d,ii))]*[err_n(:,:,d,ii); conj(err_n(:,:,d,ii))]';
         MSE_simulated_tilda(:,:,d,ii)=1/4*J'*MSE_simulated(:,:,d,ii)*J;
         
-        Gaussianity_test_n(1,d,ii)=Roystest_mod([real(r_n(1,1:K_normaltest,d,ii))' imag(r_n(1,1:K_normaltest,d,ii))']);
-        Gaussianity_test_n(2,d,ii)=Roystest_mod([real(r_n(2,1:K_normaltest,d,ii))' imag(r_n(2,1:K_normaltest,d,ii))']);
+%         Gaussianity_test_n(1,d,ii)=Roystest_mod([real(r_n(1,1:K_normaltest,d,ii))' imag(r_n(1,1:K_normaltest,d,ii))']);
+%         Gaussianity_test_n(2,d,ii)=Roystest_mod([real(r_n(2,1:K_normaltest,d,ii))' imag(r_n(2,1:K_normaltest,d,ii))']);
+        Gaussianity_test_n(d,ii)=HZmvntest_mod([real(r_n(1,:,d,ii))' imag(r_n(1,:,d,ii))' real(r_n(2,:,d,ii))' imag(r_n(2,:,d,ii))']);
     end
     close(h); %Close waitbar
 end
@@ -90,6 +91,8 @@ r_mean = mean(r_n,2); %Mean of the roots computed at every iteration
 err_mean = mean(err_n,2); %Mean of the error computed at every iteration
 
 discr_eig_ratio=abs(Delta_exact)./eig_dom %An interesting table to look at! discriminant/dominant_eigenvalue
+
+Gaussianity_test_n'
 
 %% Plots
 figs(1)=figure(1);
@@ -120,7 +123,7 @@ for d=1:D
         plot(real(Delta_n(:,d,ii)),imag(Delta_n(:,d,ii)),'.','MarkerSize',1); hold on; % Simulated coeff
         
         color="";% We color with red the title if the P-Value is less than confidence level
-        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<confidence)
+        if (Gaussianity_test_n(d,ii)<confidence)
             color="\color{red}";
         end
         axis equal;%axis([min(real(Delta_n(:,d,ii))),max(real(Delta_n(:,d,ii))),min(imag(Delta_n(:,d,ii))),max(imag(Delta_n(:,d,ii)))]);
@@ -148,7 +151,7 @@ for d=1:D
         plot(real(r(:,d)),imag(r(:,d)),'*k','MarkerSize',20); % True roots
 %         axis equal;axis([min(min(real(r_n(1,:,d,ii))),min(real(r_n(2,:,d,ii)))),max(max(real(r_n(1,:,d,ii))),max(real(r_n(2,:,d,ii)))),min(min(imag(r_n(1,:,d,ii))),min(imag(r_n(2,:,d,ii)))),max(max(imag(r_n(1,:,d,ii))),max(imag(r_n(2,:,d,ii))))]);
         color="";% We color with red the title if the P-Value is less than confidence level
-        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<confidence)
+        if (Gaussianity_test_n(d,ii)<confidence)
             color="\color{red}";
         end
         axis equal;
@@ -172,7 +175,7 @@ for d=1:D
         
 %         axis equal;axis([min(min(real(r_n(1,:,d,ii))),min(real(r_n(2,:,d,ii)))),max(max(real(r_n(1,:,d,ii))),max(real(r_n(2,:,d,ii)))),min(min(imag(r_n(1,:,d,ii))),min(imag(r_n(2,:,d,ii)))),max(max(imag(r_n(1,:,d,ii))),max(imag(r_n(2,:,d,ii))))]);
         color="";% We color with red the title if the P-Value is less than confidence level
-        if (min(Gaussianity_test_n(1,d,ii),Gaussianity_test_n(2,d,ii))<confidence)
+        if (Gaussianity_test_n(d,ii)<confidence)
             color="\color{red}";
         end
         axis equal;
@@ -200,13 +203,13 @@ end
 for d=1:D
     for ii=1:SNR_nsteps
         subplot(1,2,1);
-        if Gaussianity_test_n(1,d,ii)<confidence
+        if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
         end
         
 
         subplot(1,2,2);
-        if Gaussianity_test_n(1,d,ii)<confidence
+        if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
         end
     end
@@ -231,13 +234,13 @@ end
 for d=1:D
     for ii=1:SNR_nsteps
         subplot(1,2,1);
-        if Gaussianity_test_n(1,d,ii)<confidence
+        if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
         end
         
 
         subplot(1,2,2);
-        if Gaussianity_test_n(1,d,ii)<confidence
+        if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
         end
     end
