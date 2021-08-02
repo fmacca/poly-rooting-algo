@@ -127,7 +127,8 @@ for d=1:D
             color="\color{red}";
         end
         axis equal;%axis([min(real(Delta_n(:,d,ii))),max(real(Delta_n(:,d,ii))),min(imag(Delta_n(:,d,ii))),max(imag(Delta_n(:,d,ii)))]);
-        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
+%         title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Discriminant distribution");
@@ -155,7 +156,8 @@ for d=1:D
             color="\color{red}";
         end
         axis equal;
-        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
+%         title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
     end
 end
 sgtitle("Roots distributions");

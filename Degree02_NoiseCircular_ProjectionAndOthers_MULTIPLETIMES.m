@@ -20,7 +20,9 @@ SNRlin = 10.^(SNR/10); %(sqrt(1/SNRlin(isnr)))
 SNR_nsteps=numel(SNR);
 K=10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
-NRUNS=10;%20; % Number of times we generate a different polynomial
+NRUNS=4;%20; % Number of times we generate a different polynomial
+
+plot_for_thesis=1; % 1 if we want the plots for the publication, 0 if we want the plots for investigation
 
 %%
 for counter=1:NRUNS
@@ -106,64 +108,82 @@ for counter=1:NRUNS
     close(h); %Close waitbar
 
 %     [SNR' abs(Projection)  abs(r(1)-r(2))./abs(Projection) Gaussianity_test_n Ttest_p];
+    if plot_for_thesis
+        figs(1)=figure(1);
+        subplot(1,2,1);
+        semilogx(abs(Projection),HotT2_p,'x');hold on;grid on;
+    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'r-');
+        semilogx([3 3],[0 1],'b--');
+        xlabel("|\gamma(z_0)|");ylabel("p-value of Hotelling's T^2 test");
+        title("Test for the mean");
+        
+        subplot(1,2,2);
+        semilogx(abs(Projection),Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(abs(Projection),Gauss_test_Roy,'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'r-');
+        semilogx([20 20],[0 1],'b--');
+        xlabel("|\gamma(z_0)|");ylabel("p-value of Henze-Zirkler's test");
+        title("Test for normality");
 
-    % Plots
-    figs(1)=figure(1);
-    subplot(1,3,1);
-    semilogx(abs(Projection),HotT2_p,'x');hold on;grid on;
-%     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-    semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
-    semilogx([3 3],[0 1],'-');
-    xlabel("Abs(projection)");ylabel("pvalue of Hotelling's T^2 test");
+    else % Plots for investigation
+        % Plots
+        figs(1)=figure(1);
+        subplot(1,3,1);
+        semilogx(abs(Projection),HotT2_p,'x');hold on;grid on;
+    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
+        semilogx([3 3],[0 1],'-');
+        xlabel("Abs(projection)");ylabel("pvalue of Hotelling's T^2 test");
 
-    figs(2)=figure(2);
-    subplot(1,3,1);
-    semilogx(abs(Projection),Gauss_test_HZ,'x');hold on;grid on;
-%     semilogx(abs(Projection),Gauss_test_Roy,'x-');
-    semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
-    semilogx([20 20],[0 1],'-');
-    xlabel("Abs(projection)");ylabel("pvalue of mtv. gaussianity test");
+        figs(2)=figure(2);
+        subplot(1,3,1);
+        semilogx(abs(Projection),Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(abs(Projection),Gauss_test_Roy,'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
+        semilogx([20 20],[0 1],'-');
+        xlabel("Abs(projection)");ylabel("pvalue of mtv. gaussianity test");
 
-    figs(1)=figure(1);
-    subplot(1,3,2);
-    semilogx(discr_eig_ratio,HotT2_p,'x');hold on;grid on;
-%     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
-    semilogx([3 3],[0 1],'-');
-    xlabel("|\Delta|/\lambda");ylabel("pvalue of Hotelling's T^2 test");
+        figs(1)=figure(1);
+        subplot(1,3,2);
+        semilogx(discr_eig_ratio,HotT2_p,'x');hold on;grid on;
+    %     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
+        semilogx([3 3],[0 1],'-');
+        xlabel("|\Delta|/\lambda");ylabel("pvalue of Hotelling's T^2 test");
 
-    figs(2)=figure(2);
-    subplot(1,3,2);
-    semilogx(discr_eig_ratio,Gauss_test_HZ,'x');hold on;grid on;
-%     semilogx(discr_eig_ratio,Gauss_test_Roy,'x-');
-    semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
-    semilogx([30 30],[0 1],'-');
-    xlabel("|\Delta|/\lambda");ylabel("pvalue of mtv. gaussianity test");
+        figs(2)=figure(2);
+        subplot(1,3,2);
+        semilogx(discr_eig_ratio,Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(discr_eig_ratio,Gauss_test_Roy,'x-');
+        semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
+        semilogx([30 30],[0 1],'-');
+        xlabel("|\Delta|/\lambda");ylabel("pvalue of mtv. gaussianity test");
 
-    figs(1)=figure(1);
-    subplot(1,3,3);
-    semilogx(ratio,HotT2_p,'x');hold on;grid on;
-%     semilogx(ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
-    semilogx([1 1],[0 1],'-');
-    xlabel("dist/projection ratio");ylabel("pvalue of Hotelling's T^2 test");
+        figs(1)=figure(1);
+        subplot(1,3,3);
+        semilogx(ratio,HotT2_p,'x');hold on;grid on;
+    %     semilogx(ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
+        semilogx([1 1],[0 1],'-');
+        xlabel("dist/projection ratio");ylabel("pvalue of Hotelling's T^2 test");
 
-    figs(2)=figure(2);
-    subplot(1,3,3);
-    semilogx(ratio,Gauss_test_HZ,'x');hold on;grid on;
-%     semilogx(ratio,Gauss_test_Roy,'x-');
-    semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
-    semilogx([0.2 0.2],[0 1],'-');
-    xlabel("dist/projection ratio");ylabel("pvalue of mtv. gaussianity test");
+        figs(2)=figure(2);
+        subplot(1,3,3);
+        semilogx(ratio,Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(ratio,Gauss_test_Roy,'x-');
+        semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
+        semilogx([0.2 0.2],[0 1],'-');
+        xlabel("dist/projection ratio");ylabel("pvalue of mtv. gaussianity test");
 
-    figs(3)=figure(3);
-    subplot(1,2,1);
-    loglog(abs(Projection),discr_eig_ratio,'x-');hold on;grid on;
-    xlabel("Abs(projection)");ylabel("|\Delta|/\lambda");
-    subplot(1,2,2);
-    loglog(discr_eig_ratio,ratio,'x-');hold on;grid on;
-    xlabel("|\Delta|/\lambda");ylabel("dist/projection ratio");
-
+        figs(3)=figure(3);
+        subplot(1,2,1);
+        loglog(abs(Projection),discr_eig_ratio,'x-');hold on;grid on;
+        xlabel("Abs(projection)");ylabel("|\Delta|/\lambda");
+        subplot(1,2,2);
+        loglog(discr_eig_ratio,ratio,'x-');hold on;grid on;
+        xlabel("|\Delta|/\lambda");ylabel("dist/projection ratio");
+    end
 end
 
 %% Save workspace and figures to the folder
