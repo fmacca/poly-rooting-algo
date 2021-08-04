@@ -18,11 +18,14 @@ N=2; % order of the polynomial
 SNR = [-12:3:40];
 SNRlin = 10.^(SNR/10); %(sqrt(1/SNRlin(isnr)))
 SNR_nsteps=numel(SNR);
-K=10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=10^5;%10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K_normaltest=10^4; % Number of iterations to be used for normality test (since it cannot handle 10^5)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
-NRUNS=4;%20; % Number of times we generate a different polynomial
+NRUNS=10;%20; % Number of times we generate a different polynomial
 
 plot_for_thesis=1; % 1 if we want the plots for the publication, 0 if we want the plots for investigation
+
+dataset=[];
 
 %%
 for counter=1:NRUNS
@@ -55,7 +58,6 @@ for counter=1:NRUNS
     Delta_exact=poly2D_discriminant(a);
 
     % Normality tests
-    K_normaltest=2*10^3; % Number of iterations to be used for normality test
 %     Gauss_test_Roy=zeros(SNR_nsteps,1); % Matrices to collect the result of Roystest_mod
     Gauss_test_HZ=zeros(SNR_nsteps,1); % Matrices to collect the result of HZmvntest_mod
 
@@ -95,7 +97,7 @@ for counter=1:NRUNS
         MSE_simulated_tilda(:,:,ii)=1/4*J'*MSE_simulated(:,:,ii)*J;
 
 %         Gauss_test_Roy(ii)=Roystest_mod([real(r_n(1,1:K_normaltest,ii))' imag(r_n(1,1:K_normaltest,ii))' real(r_n(2,1:K_normaltest,ii))' imag(r_n(2,1:K_normaltest,ii))']);
-        Gauss_test_HZ(ii)=HZmvntest_mod([real(r_n(1,:,ii))' imag(r_n(1,:,ii))' real(r_n(2,:,ii))' imag(r_n(2,:,ii))']);
+        Gauss_test_HZ(ii)=HZmvntest_mod([real(r_n(1,1:K_normaltest,ii))' imag(r_n(1,1:K_normaltest,ii))' real(r_n(2,1:K_normaltest,ii))' imag(r_n(2,1:K_normaltest,ii))']);
 %         [~,Ttest_p(ii,:)]=ttest([real(r_n(1,:,ii))'-real(r(1)) imag(r_n(1,:,ii))'-imag(r(1)) real(r_n(2,:,ii))'-real(r(2)) imag(r_n(2,:,ii))'-imag(r(2))]);
         HotT2_p(ii)=T2Hot1_mod([real(r_n(1,:,ii))'-real(r(1)) imag(r_n(1,:,ii))'-imag(r(1)) real(r_n(2,:,ii))'-real(r(2)) imag(r_n(2,:,ii))'-imag(r(2))]);
     end
@@ -104,6 +106,10 @@ for counter=1:NRUNS
     discr_eig_ratio=abs(Delta_exact)./eig_dom;
 
     ratio=abs(r(1)-r(2))./abs(Projection);
+    
+    % Save everything into a matrix [counter r1 r2 Projection Gauss_test_HZ
+    % HotT2_p]
+    dataset=[dataset; [counter*ones(SNR_nsteps,1) r(1)*ones(SNR_nsteps,1) r(2)*ones(SNR_nsteps,1) Projection Gauss_test_HZ HotT2_p]];
 
     close(h); %Close waitbar
 
@@ -190,3 +196,4 @@ end
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
 clear figs
 save(strcat(results_folder,'/workspace'));
+save(strcat(results_folder,'/dataset'),'dataset');

@@ -18,9 +18,15 @@ N=2; % order of the polynomial
 SNR = [-12:3:40];
 SNRlin = 10.^(SNR/10); %(sqrt(1/SNRlin(isnr)))
 SNR_nsteps=numel(SNR);
-K=10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K_normaltest=10^4; % Number of iterations to be used for normality test (since it cannot handle 10^5)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 NRUNS=10;%20; % Number of times we generate a different polynomial
+
+
+plot_for_thesis=1; % 1 if we want the plots for the publication, 0 if we want the plots for investigation
+
+dataset=[];
 
 %%
 for counter=1:NRUNS
@@ -54,13 +60,12 @@ for counter=1:NRUNS
     Delta_exact=poly2D_discriminant(a);
 
     % Normality tests
-    K_normaltest=2*10^3; % Number of iterations to be used for normality test
 %     Gauss_test_Roy=zeros(SNR_nsteps,1); % Matrices to collect the result of Roystest_mod
     Gauss_test_HZ=zeros(SNR_nsteps,1); % Matrices to collect the result of HZmvntest_mod
 
     % Tests for the mean
 %     Ttest_p=zeros(SNR_nsteps,4); % 4 univariate t-tests
-    HotT2_p=zeros(SNR_nsteps,1); % Hotelling T^2 test
+%     HotT2_p=zeros(SNR_nsteps,1); % Hotelling T^2 test
     
     % Test for equality of covariances
     MBox_p=zeros(SNR_nsteps,1);
@@ -105,9 +110,9 @@ for counter=1:NRUNS
         MSE_simulated_tilda(:,:,ii)=1/4*J'*MSE_simulated(:,:,ii)*J;
 
 %         Gauss_test_Roy(ii)=Roystest_mod([real(r_n(1,1:K_normaltest,ii))' imag(r_n(1,1:K_normaltest,ii))' real(r_n(2,1:K_normaltest,ii))' imag(r_n(2,1:K_normaltest,ii))']);
-        Gauss_test_HZ(ii)=HZmvntest_mod([real(r_n(1,:,ii))' imag(r_n(1,:,ii))' real(r_n(2,:,ii))' imag(r_n(2,:,ii))']);
+        Gauss_test_HZ(ii)=HZmvntest_mod([real(r_n(1,1:K_normaltest,ii))' imag(r_n(1,1:K_normaltest,ii))' real(r_n(2,1:K_normaltest,ii))' imag(r_n(2,1:K_normaltest,ii))']);
 %         [~,Ttest_p(ii,:)]=ttest([real(r_n(1,:,ii))'-real(r(1)) imag(r_n(1,:,ii))'-imag(r(1)) real(r_n(2,:,ii))'-real(r(2)) imag(r_n(2,:,ii))'-imag(r(2))]);
-        HotT2_p(ii)=T2Hot1_mod([real(r_n(1,:,ii))'-real(r(1)) imag(r_n(1,:,ii))'-imag(r(1)) real(r_n(2,:,ii))'-real(r(2)) imag(r_n(2,:,ii))'-imag(r(2))]);
+%         HotT2_p(ii)=T2Hot1_mod([real(r_n(1,:,ii))'-real(r(1)) imag(r_n(1,:,ii))'-imag(r(1)) real(r_n(2,:,ii))'-real(r(2)) imag(r_n(2,:,ii))'-imag(r(2))]);
         
         MBox_p(ii)=MBoxtest_mod([[ones(K,1) real(r_n(1,:,ii))' imag(r_n(1,:,ii))' real(r_n(2,:,ii))' imag(r_n(2,:,ii))'];[2*ones(K,1) real(r_n_sim_analytic(1,:,ii))' imag(r_n_sim_analytic(1,:,ii))' real(r_n_sim_analytic(2,:,ii))' imag(r_n_sim_analytic(2,:,ii))']]);
         
@@ -119,166 +124,171 @@ for counter=1:NRUNS
 
     ratio=abs(r(1)-r(2))./abs(Projection);
 
+    % Save everything into a matrix [counter r1 r2 Projection Gauss_test_HZ
+    % MBox_p Manova_d Manova_p]
+    dataset=[dataset; [counter*ones(SNR_nsteps,1) r(1)*ones(SNR_nsteps,1) r(2)*ones(SNR_nsteps,1) Projection Gauss_test_HZ MBox_p Manova_d Manova_p]];
+
+    
     close(h); %Close waitbar
 
 %     [SNR' abs(Projection)  abs(r(1)-r(2))./abs(Projection) Gaussianity_test_n Ttest_p];
+    
+    if plot_for_thesis
+        figs(1)=figure(1);       
+        subplot(1,3,1);
+        semilogx(abs(Projection),Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(abs(Projection),Gauss_test_Roy,'x-');
+        yline(0.05,'r-');
+        semilogx([20 20],[0 1],'b--');
+        xlabel("|\gamma(z_0)|");ylabel("p-value of Henze-Zirkler's test");
+        title("Test for normality");
+        
+        subplot(1,3,2);
+        semilogx(abs(Projection),MBox_p,'x');hold on;grid on;
+    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+        yline(0.05,'r-');
+        semilogx([8 8],[0 1],'b--');
+        xlabel("|\gamma(z_0)|");ylabel("pvalue of Box's M test");
+        title("Test for the covariance");
+        
+        subplot(1,3,3);
+        semilogx(abs(Projection),Manova_p,'x');hold on;grid on;
+    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+        yline(0.05,'r-');
+        semilogx([3 3],[0 1],'b--');
+        xlabel("|\gamma(z_0)|");ylabel("pvalue of Manova test");
+        title("Test for the mean");
 
-    % Plots
-    figs(1)=figure(1);
-    subplot(1,3,1);
-    semilogx(abs(Projection),HotT2_p,'x');hold on;grid on;
-%     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-    semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
-    semilogx([3 3],[0 1],'-');
-    xlabel("Abs(projection)");ylabel("pvalue of Hotelling's T^2 test");
+    else % Plots for investigation
+        % Plots
+    %     figs(1)=figure(1);
+    %     subplot(1,3,1);
+    %     semilogx(abs(Projection),HotT2_p,'x');hold on;grid on;
+    % %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+    %     semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
+    %     semilogx([3 3],[0 1],'-');
+    %     xlabel("Abs(projection)");ylabel("pvalue of Hotelling's T^2 test");
 
-    figs(2)=figure(2);
-    subplot(1,3,1);
-    semilogx(abs(Projection),Gauss_test_HZ,'x');hold on;grid on;
-%     semilogx(abs(Projection),Gauss_test_Roy,'x-');
-    semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
-    semilogx([23 23],[0 1],'-');
-    xlabel("Abs(projection)");ylabel("pvalue of mtv. gaussianity test");
+        figs(2)=figure(2);
+        subplot(1,3,1);
+        semilogx(abs(Projection),Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(abs(Projection),Gauss_test_Roy,'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
+        semilogx([23 23],[0 1],'-');
+        xlabel("Abs(projection)");ylabel("pvalue of mtv. gaussianity test");
 
-    figs(1)=figure(1);
-    subplot(1,3,2);
-    semilogx(discr_eig_ratio,HotT2_p,'x');hold on;grid on;
-%     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
-    semilogx([3 3],[0 1],'-');
-    xlabel("|\Delta|/\lambda");ylabel("pvalue of Hotelling's T^2 test");
+    %     figs(1)=figure(1);
+    %     subplot(1,3,2);
+    %     semilogx(discr_eig_ratio,HotT2_p,'x');hold on;grid on;
+    % %     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
+    %     semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
+    %     semilogx([3 3],[0 1],'-');
+    %     xlabel("|\Delta|/\lambda");ylabel("pvalue of Hotelling's T^2 test");
 
-    figs(2)=figure(2);
-    subplot(1,3,2);
-    semilogx(discr_eig_ratio,Gauss_test_HZ,'x');hold on;grid on;
-%     semilogx(discr_eig_ratio,Gauss_test_Roy,'x-');
-    semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
-    semilogx([30 30],[0 1],'-');
-    xlabel("|\Delta|/\lambda");ylabel("pvalue of mtv. gaussianity test");
+        figs(2)=figure(2);
+        subplot(1,3,2);
+        semilogx(discr_eig_ratio,Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(discr_eig_ratio,Gauss_test_Roy,'x-');
+        semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
+        semilogx([30 30],[0 1],'-');
+        xlabel("|\Delta|/\lambda");ylabel("pvalue of mtv. gaussianity test");
 
-    figs(1)=figure(1);
-    subplot(1,3,3);
-    semilogx(ratio,HotT2_p,'x');hold on;grid on;
-%     semilogx(ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
-    semilogx([1 1],[0 1],'-');
-    xlabel("dist/projection ratio");ylabel("pvalue of Hotelling's T^2 test");
+    %     figs(1)=figure(1);
+    %     subplot(1,3,3);
+    %     semilogx(ratio,HotT2_p,'x');hold on;grid on;
+    % %     semilogx(ratio,min(Ttest_p,[],2),'x-');
+    %     semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
+    %     semilogx([1 1],[0 1],'-');
+    %     xlabel("dist/projection ratio");ylabel("pvalue of Hotelling's T^2 test");
 
-    figs(2)=figure(2);
-    subplot(1,3,3);
-    semilogx(ratio,Gauss_test_HZ,'x');hold on;grid on;
-%     semilogx(ratio,Gauss_test_Roy,'x-');
-    semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
-    semilogx([0.2 0.2],[0 1],'-');
-    xlabel("dist/projection ratio");ylabel("pvalue of mtv. gaussianity test");
+        figs(2)=figure(2);
+        subplot(1,3,3);
+        semilogx(ratio,Gauss_test_HZ,'x');hold on;grid on;
+    %     semilogx(ratio,Gauss_test_Roy,'x-');
+        semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
+        semilogx([0.2 0.2],[0 1],'-');
+        xlabel("dist/projection ratio");ylabel("pvalue of mtv. gaussianity test");
 
-    figs(3)=figure(3);
-    subplot(1,3,1);
-    semilogx(abs(Projection),MBox_p,'x');hold on;grid on;
-%     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-    semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
-    semilogx([8 8],[0 1],'-');
-    xlabel("Abs(projection)");ylabel("pvalue of Box's M test");
-    
-    figs(3)=figure(3);
-    subplot(1,3,2);
-    semilogx(discr_eig_ratio,MBox_p,'x');hold on;grid on;
-%     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
-    semilogx([5 5],[0 1],'-');
-    xlabel("|\Delta|/\lambda");ylabel("pvalue of Box's M test");
-    
-    figs(3)=figure(3);
-    subplot(1,3,3);
-    semilogx(ratio,MBox_p,'x');hold on;grid on;
-%     semilogx(ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
-    semilogx([0.4 0.4],[0 1],'-');
-    xlabel("dist/projection ratio");ylabel("pvalue of Box's M test");
-    
-    % Manova results
-    figs(4)=figure(4);
-    subplot(2,3,1);
-    semilogx(abs(Projection),Manova_p,'x');hold on;grid on;
-%     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-    semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
-    semilogx([3 3],[0 1],'-');
-    xlabel("Abs(projection)");ylabel("pvalue of Manova test");
-    
-    subplot(2,3,2);
-    semilogx(discr_eig_ratio,Manova_p,'x');hold on;grid on;
-%     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
-    semilogx([5 5],[0 1],'-');
-    xlabel("|\Delta|/\lambda");ylabel("pvalue of Manova test");
-    
-    subplot(2,3,3);
-    semilogx(ratio,Manova_p,'x');hold on;grid on;
-%     semilogx(ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
-    semilogx([0.4 0.4],[0 1],'-');
-    xlabel("dist/projection ratio");ylabel("pvalue of Manova test");
-    
-        subplot(2,3,4);
-    semilogx(abs(Projection),Manova_d,'x');hold on;grid on;
-%     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-    semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
-    semilogx([3 3],[0 1],'-');
-    xlabel("Abs(projection)");ylabel("Value d of Manova test");
-    
-    subplot(2,3,5);
-    semilogx(discr_eig_ratio,Manova_d,'x');hold on;grid on;
-%     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
-    semilogx([5 5],[0 1],'-');
-    xlabel("|\Delta|/\lambda");ylabel("Value d of Manova test");
-    
-    subplot(2,3,6);
-    semilogx(ratio,Manova_d,'x');hold on;grid on;
-%     semilogx(ratio,min(Ttest_p,[],2),'x-');
-    semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
-    semilogx([0.4 0.4],[0 1],'-');
-    xlabel("dist/projection ratio");ylabel("Value d of Manova test");
-    
-    figs(5)=figure(5);
-    subplot(1,2,1);
-    loglog(abs(Projection),discr_eig_ratio,'x-');hold on;grid on;
-    xlabel("Abs(projection)");ylabel("|\Delta|/\lambda");
-    subplot(1,2,2);
-    loglog(discr_eig_ratio,ratio,'x-');hold on;grid on;
-    xlabel("|\Delta|/\lambda");ylabel("dist/projection ratio");
-    
-%     figs(6)=figure(6);
-%     D=SNR_nsteps;
-%     for d=1:SNR_nsteps
-%         subplot(4,D/2,d);
-%         viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
-%         plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
-%         for ii=1:N
-%             plot(real(r_n(ii,:,d)),imag(r_n(ii,:,d)),'.','MarkerSize',1); hold on; % Simulated roots
-%         end
-%         for ii=1:N
-%         %     Ellipse_plot(0.1*inv(Cov_ztilda([ii N+ii],[ii N+ii])),[real(avgs(ii))-real(bias(ii)),imag(avgs(ii))-imag(bias(ii))])
-%             ellipse_plot(0.1*inv(MSE_analytic_tilda([ii N+ii],[ii N+ii],d)),[real(r(ii)),imag(r(ii))])
-%         end
-%         plot(real(r_mean(:,:,d)),imag(r_mean(:,:,d)),'.b','MarkerSize',15); % Mean of estimated roots
-%         plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
-%         axis equal;axis(2*[-1,1,-1,1]);
-%         title(strcat("Roots, SNR = ",num2str(SNR(d))));grid on;hold off
-%         
-%         subplot(4,D/2,D+d);
-%         viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
-%         plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
-%         for ii=1:N
-%             plot(real(r_n_sim_analytic(ii,:,d)),imag(r_n_sim_analytic(ii,:,d)),'.','MarkerSize',1); hold on; % Simulated roots
-%         end
-%         for ii=1:N
-%         %     Ellipse_plot(0.1*inv(Cov_ztilda([ii N+ii],[ii N+ii])),[real(avgs(ii))-real(bias(ii)),imag(avgs(ii))-imag(bias(ii))])
-%             ellipse_plot(0.1*inv(MSE_analytic_tilda([ii N+ii],[ii N+ii],d)),[real(r(ii)),imag(r(ii))])
-%         end
-%         plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
-%         axis equal;axis(2*[-1,1,-1,1]);
-%         title(strcat("Roots, SNR = ",num2str(SNR(d))));grid on;hold off
-%     end
+        figs(3)=figure(3);
+        subplot(1,3,1);
+        semilogx(abs(Projection),MBox_p,'x');hold on;grid on;
+    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
+        semilogx([8 8],[0 1],'-');
+        xlabel("Abs(projection)");ylabel("pvalue of Box's M test");
 
+        figs(3)=figure(3);
+        subplot(1,3,2);
+        semilogx(discr_eig_ratio,MBox_p,'x');hold on;grid on;
+    %     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
+        semilogx([5 5],[0 1],'-');
+        xlabel("|\Delta|/\lambda");ylabel("pvalue of Box's M test");
+
+        figs(3)=figure(3);
+        subplot(1,3,3);
+        semilogx(ratio,MBox_p,'x');hold on;grid on;
+    %     semilogx(ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
+        semilogx([0.4 0.4],[0 1],'-');
+        xlabel("dist/projection ratio");ylabel("pvalue of Box's M test");
+
+        % Manova results
+        figs(4)=figure(4);
+        subplot(2,3,1);
+        semilogx(abs(Projection),Manova_p,'x');hold on;grid on;
+    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
+        semilogx([3 3],[0 1],'-');
+        xlabel("Abs(projection)");ylabel("pvalue of Manova test");
+
+        subplot(2,3,2);
+        semilogx(discr_eig_ratio,Manova_p,'x');hold on;grid on;
+    %     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
+        semilogx([5 5],[0 1],'-');
+        xlabel("|\Delta|/\lambda");ylabel("pvalue of Manova test");
+
+        subplot(2,3,3);
+        semilogx(ratio,Manova_p,'x');hold on;grid on;
+    %     semilogx(ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
+        semilogx([0.4 0.4],[0 1],'-');
+        xlabel("dist/projection ratio");ylabel("pvalue of Manova test");
+
+            subplot(2,3,4);
+        semilogx(abs(Projection),Manova_d,'x');hold on;grid on;
+    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'-');
+        semilogx([3 3],[0 1],'-');
+        xlabel("Abs(projection)");ylabel("Value d of Manova test");
+
+        subplot(2,3,5);
+        semilogx(discr_eig_ratio,Manova_d,'x');hold on;grid on;
+    %     semilogx(discr_eig_ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(discr_eig_ratio) max(discr_eig_ratio)],[0.05 0.05],'-');
+        semilogx([5 5],[0 1],'-');
+        xlabel("|\Delta|/\lambda");ylabel("Value d of Manova test");
+
+        subplot(2,3,6);
+        semilogx(ratio,Manova_d,'x');hold on;grid on;
+    %     semilogx(ratio,min(Ttest_p,[],2),'x-');
+        semilogx([min(ratio) max(ratio)],[0.05 0.05],'-');
+        semilogx([0.4 0.4],[0 1],'-');
+        xlabel("dist/projection ratio");ylabel("Value d of Manova test");
+
+        figs(5)=figure(5);
+        subplot(1,2,1);
+        loglog(abs(Projection),discr_eig_ratio,'x-');hold on;grid on;
+        xlabel("Abs(projection)");ylabel("|\Delta|/\lambda");
+        subplot(1,2,2);
+        loglog(discr_eig_ratio,ratio,'x-');hold on;grid on;
+        xlabel("|\Delta|/\lambda");ylabel("dist/projection ratio");
+    end
 end
+
+%% Save workspace and figures to the folder
+savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
+clear figs
+save(strcat(results_folder,'/workspace'));
+save(strcat(results_folder,'/dataset'),'dataset');
