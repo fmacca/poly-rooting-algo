@@ -4,7 +4,7 @@ clc
 
 addpath('Resources') 
 %% Generate folder for results
-folder_name='Results/Degree02_LogisticRegressionHotT2'; %Name for the results folder: it should be named after the kind of test performed
+folder_name='Results/Degree02_LogisticRegressionGaussHZ'; %Name for the results folder: it should be named after the kind of test performed
 
 currDate = datestr(datetime,30);
 mkdir(folder_name,currDate);
@@ -23,13 +23,13 @@ HotT2_p = dataset(:,6);
 
 %% Setting the model variables
 x = log(abs(Projection));
-t = (HotT2_p >= 0.05);
+t = (Gauss_test_HZ >= 0.05);
 
 %% Logistic regression
 t = t+1;
 [B, ~, stats] = mnrfit(x,t); % computes the weight matrix
 
-lev=0.4; %Model threshold
+lev=0.6; %Model threshold
 sep_line=(log((1-lev)./lev)-B(1))/B(2);
 exp(sep_line)
 
@@ -44,25 +44,25 @@ tpr=cm(2,2)/(cm(2,1)+cm(2,2)); %sensitivuty
 
 %% Plots
 figs(1)=figure(1);
-plot(x,HotT2_p,'x'); hold on; grid on;
+plot(x,Gauss_test_HZ,'x'); hold on; grid on;
 % plot(x,t-1,'rx');
 yline(0.05,'r');
 plot(x,pihat(:,2),'r.');
 xline(sep_line,'b--');
-legend("P-value of Hotelling T$^2$ test","Level $\alpha=0.05$ for T$^2$ test","Fitted model","Separating value $\overline{\gamma}_{T^2}$","Location","Northwest","interpreter","latex");
-title("Hotelling T^2 test");
+legend("P-value of HZ test","Level $\alpha=0.05$ for HZ test","Fitted model","Separating value $\overline{\gamma}_{HZ}$","Location","Northwest","interpreter","latex");
+title("Henze-Zirkler's Multivariate Normality test");
 xlabel("log(|\gamma(z_0)|)");
 ylabel("Probability");
 hold off
 
 figs(2)=figure(2);
-plot(HotT2_p,pihat(:,2),'x'); hold on; grid on;
+plot(Gauss_test_HZ,pihat(:,2),'x'); hold on; grid on;
 yline(lev,'b--');
 xline(0.05,'r');
-xlabel("P-value of Hotelling T^2 test");
+xlabel("P-value of HZ test");
 ylabel("Probability from fitted model");
-legend("Fitted vs actual","Chosen model threshold","Level $\alpha=0.05$ for T$^2$ test","Location","Southeast","interpreter","latex")
-title("Logistic regression fitted probabilities vs T^2 test P-values");
+legend("Fitted vs actual","Chosen model threshold","Level $\alpha=0.05$ for HZ test","Location","Southeast","interpreter","latex")
+title("Logistic regression fitted probabilities vs HZ test P-values");
 hold off
 
 figs(3)=figure(3); % ROC curve
