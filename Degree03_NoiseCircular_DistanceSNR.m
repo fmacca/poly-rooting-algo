@@ -4,7 +4,7 @@ clc
 
 addpath('Resources') 
 %% Generate folder for results
-folder_name='Results/Degree02_NoiseCircular_DistanceSNR'; %Name for the results folder: it should be named after the kind of test performed
+folder_name='Results/Degree03_NoiseCircular_DistanceSNR'; %Name for the results folder: it should be named after the kind of test performed
 
 currDate = datestr(datetime,30);
 mkdir(folder_name,currDate);
@@ -13,15 +13,19 @@ results_folder=strcat(folder_name,'/',currDate);
 %through figs(1)=figure(1); figs(2)=figure(2);
 
 %% Parameters
-N=2; % order of the polynomial
+N=3; % order of the polynomial
 %sigma_a=.01; % variance of the noise on coefficients
 SNR = [0:12:36];
 SNRlin = 10.^(SNR/10); %(sqrt(1/SNRlin(isnr)))
 SNR_nsteps=numel(SNR);
-K=10^4;%10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
-K_normaltest=2*10^3; % Number of iterations to be used for normality test
+K=10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K_normaltest=10^4; % Number of iterations to be used for normality test
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 D=4; % number of shortening steps
+% distances=zeros(N,D);
+% for ii=1:N
+%     distances(ii,:)=abs((4+randn(1))*(1/2).^(0:(D-1)));
+% end
 distances=abs((4+randn(1))*(1/2).^(0:(D-1)));
 
 confidence=0.05; % Confidence level for normality testing
@@ -31,7 +35,7 @@ confidence=0.05; % Confidence level for normality testing
 [Sigma,C_atilda,A] = generate_covariance(N,1,'circular');
 % Generate a random root baricenter and a random direction for the roots
 r1=[scale*(2*rand(1,1)-1)+scale*1i*(2*rand(1,1)-1)];
-dir=rand(1)*2*pi;
+dir=rand(N,1)*2*pi;
 
 %% Simulation
 Delta_n=zeros(K,D,SNR_nsteps); % Matrix to contain the discriminant at every iteration
@@ -55,9 +59,9 @@ Gaussianity_test_n=zeros(D,SNR_nsteps); % Matrices to collect the result of HZmv
 
 for d=1:D
     h = waitbar(0,strcat('Simulations in progress ... Please wait ... ',int2str(d),'/',int2str(D),' ...'));
-    r(:,d)=[r1+distances(d)/2*exp(1i*dir); r1-distances(d)/2*exp(1i*dir)]; % Set the two roots
+    r(:,d)=[r1+distances(d).*exp(1i*dir)];%[r1+distances(:,d)/2*exp(1i*dir); r1-distances(:,d)/2*exp(1i*dir)]; % Set the roots
     a(d,:)=conj(poly(r(:,d))'); % Compute corresponding noise-free polynomial cefficients
-    Delta_exact(d)=poly2D_discriminant(a(d,:));
+    Delta_exact(d)=poly3D_discriminant(a(d,:));
     for ii=1:SNR_nsteps
         sigma_a=(sqrt(1/SNRlin(ii)));
         % Compute dominant eigenvalue of the covariance matrix
@@ -74,7 +78,7 @@ for d=1:D
             r_n(:,k,d,ii)=r_curr(order_roots_permutations(r_curr,r(:,d))); %Save roots ordered w.r.t. original roots
             err_n(:,k,d,ii)=r_n(:,k,d,ii)-r(:,d);
             
-            Delta_n(k,d,ii)=poly2D_discriminant(a_n);
+            Delta_n(k,d,ii)=poly3D_discriminant(a_n);
 
             waitbar(((ii-1)*K+k)/(K*SNR_nsteps)) %Update waitbar
         end
@@ -83,7 +87,7 @@ for d=1:D
         
 %         Gaussianity_test_n(1,d,ii)=Roystest_mod([real(r_n(1,1:K_normaltest,d,ii))' imag(r_n(1,1:K_normaltest,d,ii))']);
 %         Gaussianity_test_n(2,d,ii)=Roystest_mod([real(r_n(2,1:K_normaltest,d,ii))' imag(r_n(2,1:K_normaltest,d,ii))']);
-        Gaussianity_test_n(d,ii)=HZmvntest_mod([real(r_n(1,:,d,ii))' imag(r_n(1,:,d,ii))' real(r_n(2,:,d,ii))' imag(r_n(2,:,d,ii))']);
+        Gaussianity_test_n(d,ii)=HZmvntest_mod([real(r_n(1,1:K_normaltest,d,ii))' imag(r_n(1,1:K_normaltest,d,ii))' real(r_n(2,1:K_normaltest,d,ii))' imag(r_n(2,1:K_normaltest,d,ii))' real(r_n(3,1:K_normaltest,d,ii))' imag(r_n(3,1:K_normaltest,d,ii))']);
     end
     close(h); %Close waitbar
 end
@@ -103,12 +107,14 @@ plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','
 
 % plot(real(r_mean(:,:,d)),imag(r_mean(:,:,d)),'.b','MarkerSize',15); % Mean of estimated roots
 
-plot([real(r(1,:)) real(r(2,:))],[imag(r(1,:)) imag(r(2,:))],'-c'); % Direction
+plot([real(r1) real(r(1,:))],[imag(r1) imag(r(1,:))],'-c'); % Direction
+plot([real(r1) real(r(2,:))],[imag(r1) imag(r(2,:))],'-c'); % Direction
+plot([real(r1) real(r(3,:))],[imag(r1) imag(r(3,:))],'-c'); % Direction
 plot(real(r1),imag(r1),'xr','MarkerSize',10); % Baricenter
-plot(real(r(1,:)),imag(r(1,:)),'.b','MarkerSize',10); % True roots
+plot(real(r(1,:)),imag(r(1,:)),'.g','MarkerSize',10); % True roots
 plot(real(r(2,:)),imag(r(2,:)),'.r','MarkerSize',10); % True roots
-plot(real(r(2,:)),imag(r(2,:)),'.r','MarkerSize',10); % True roots
-axis equal;axis([real(r1)-max(distances),real(r1)+max(distances),imag(r1)-max(distances),imag(r1)+max(distances)]);
+plot(real(r(3,:)),imag(r(3,:)),'.b','MarkerSize',10); % True roots
+axis equal;axis([real(r1)-max(max(distances)),real(r1)+max(max(distances)),imag(r1)-max(max(distances)),imag(r1)+max(max(distances))]);
 title("Roots");grid on;hold off
 
 %%
@@ -191,28 +197,37 @@ figs(5)=figure(5);
 
 leg=[];
 for d=1:D
-    subplot(1,2,1);
+    subplot(1,3,1);
     plot(SNR,abs(reshape(err_mean(1,:,d,:),SNR_nsteps,1)),'o--');hold on;
     leg=[leg; strcat("dist = ",num2str(distances(d)))];
     legend(leg,'Location','northeast');
     title("Average error on root 1 vs SNR");grid on;
     
-    subplot(1,2,2);
+    subplot(1,3,2);
     plot(SNR,abs(reshape(err_mean(2,:,d,:),SNR_nsteps,1)),'o--');hold on;
     legend(leg,'Location','northeast');
     title("Average error on root 2 vs SNR");grid on;
+    
+    subplot(1,3,3);
+    plot(SNR,abs(reshape(err_mean(3,:,d,:),SNR_nsteps,1)),'o--');hold on;
+    legend(leg,'Location','northeast');
+    title("Average error on root 3 vs SNR");grid on;
 end
 for d=1:D
     for ii=1:SNR_nsteps
-        subplot(1,2,1);
+        subplot(1,3,1);
         if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
         end
         
-
-        subplot(1,2,2);
+        subplot(1,3,2);
         if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
+        end
+        
+        subplot(1,3,3);
+        if (Gaussianity_test_n(d,ii)<confidence)
+            plot(SNR(ii),abs(err_mean(3,:,d,ii)),'rx');hold on;
         end
     end
 end
@@ -222,28 +237,37 @@ figs(6)=figure(6);
 
 leg=[];
 for d=1:D
-    subplot(1,2,1);
+    subplot(1,3,1);
     semilogy(SNR,abs(reshape(err_mean(1,:,d,:),SNR_nsteps,1)),'o--');hold on;
     leg=[leg; strcat("dist = ",num2str(distances(d)))];
     legend(leg,'Location','northeast');
     title("Average error on root 1 vs SNR");grid on;
     
-    subplot(1,2,2);
+    subplot(1,3,2);
     semilogy(SNR,abs(reshape(err_mean(2,:,d,:),SNR_nsteps,1)),'o--');hold on;
+    legend(leg,'Location','northeast');
+    title("Average error on root 2 vs SNR");grid on;
+    
+    subplot(1,3,3);
+    semilogy(SNR,abs(reshape(err_mean(3,:,d,:),SNR_nsteps,1)),'o--');hold on;
     legend(leg,'Location','northeast');
     title("Average error on root 2 vs SNR");grid on;
 end
 for d=1:D
     for ii=1:SNR_nsteps
-        subplot(1,2,1);
+        subplot(1,3,1);
         if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(1,:,d,ii)),'rx');hold on;
         end
-        
 
-        subplot(1,2,2);
+        subplot(1,3,2);
         if (Gaussianity_test_n(d,ii)<confidence)
             plot(SNR(ii),abs(err_mean(2,:,d,ii)),'rx');hold on;
+        end
+        
+        subplot(1,3,3);
+        if (Gaussianity_test_n(d,ii)<confidence)
+            plot(SNR(ii),abs(err_mean(3,:,d,ii)),'rx');hold on;
         end
     end
 end
@@ -252,9 +276,9 @@ end
 figs(7)=figure(7);
 
 for d=1:D
-    leg1=[]; leg2=[];
+    leg1=[]; leg2=[]; leg3=[];
     for ii=1:SNR_nsteps
-        subplot(2,D,d)
+        subplot(3,D,d)
         loglog(1:K,abs(cumsum(err_n(1,:,d,ii),2))./repmat(1:K,1,1));
         title(strcat("Root 1, dist = ",num2str(distances(d))));grid on; hold on;
         if d==1
@@ -262,14 +286,21 @@ for d=1:D
             legend(leg1,'Location','northeast');
         end
         
-        subplot(2,D,D+d)
+        subplot(3,D,D+d)
         loglog(1:K,abs(cumsum(err_n(2,:,d,ii),2))./repmat(1:K,1,1));
         title(strcat("Root 2, dist = ",num2str(distances(d))));grid on; hold on;
         if d==1
             leg2=[leg2; strcat("SNR = ",int2str(SNR(ii)))];
             legend(leg2,'Location','northeast');
         end
-
+        
+        subplot(3,D,2*D+d)
+        loglog(1:K,abs(cumsum(err_n(3,:,d,ii),2))./repmat(1:K,1,1));
+        title(strcat("Root 3, dist = ",num2str(distances(d))));grid on; hold on;
+        if d==1
+            leg3=[leg3; strcat("SNR = ",int2str(SNR(ii)))];
+            legend(leg3,'Location','northeast');
+        end
     end
 end
 sgtitle("Average error at each iteration");
