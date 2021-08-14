@@ -86,17 +86,53 @@ plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
 axis equal;axis(3*[-1,1,-1,1]);
 title("Roots");grid on;hold off
 
-subplot(2,2,[3 4])
-loglog(1:K,abs(cumsum(err_n,2))./[1:K;1:K]);
-title("Average error (cumulative) vs iteration");grid on; hold on
+% subplot(2,2,3)
+% loglog(1:K,abs(real(cumsum(err_n,2)))./[1:K;1:K]); hold on
+% title("Abs(Re(Average error)) vs iteration");grid on;
+% loglog(1:K,repmat(abs(real(Bias_analytic(1:N))),1,K));
+% % Organizing Legend
+% leg1=[]; leg3=[];
+% for ii=1:N
+%     leg1 =[ leg1; strcat("Avg err r_",int2str(ii),", real part")];
+%     leg3 = [leg3; strcat("An. bias r_",int2str(ii),", real part")];
+% end
+% legend([leg1; leg3],"Location","Southwest");
+% 
+% subplot(2,2,4)
+% loglog(1:K,abs(imag(cumsum(err_n,2)))./[1:K;1:K]); hold on
+% title("Abs(Im(Average error)) vs iteration");grid on;
+% loglog(1:K,repmat(abs(imag(Bias_analytic(1:N))),1,K));
+% % Organizing Legend
+% leg2=[]; leg4=[];
+% for ii=1:N
+%     leg2 = [leg2; strcat("Avg err r_",int2str(ii),", imag part")];
+%     leg4 = [leg4; strcat("An. bias r_",int2str(ii),", imag part")];
+% end
+% legend([leg2; leg4],"Location","Southwest");
+
+subplot(2,2,3)
+loglog(1:K,abs(cumsum(err_n,2))./[1:K;1:K]); hold on
+title("Abs(Average error) vs iteration");grid on;
 loglog(1:K,repmat(abs(Bias_analytic(1:N)),1,K));
 % Organizing Legend
-leg1=[]; leg2=[];
+leg1=[]; leg3=[];
 for ii=1:N
-    leg1 =[ leg1; strcat("Avg err root ",int2str(ii))];
-    leg2 = [leg2; strcat("An. bias root ",int2str(ii))];
+    leg1 =[ leg1; strcat("Abs Avg err r_",int2str(ii))];
+    leg3 = [leg3; strcat("Abs An. bias r_",int2str(ii))];
 end
-legend([leg1; leg2]);
+legend([leg1; leg3],"Location","Southwest");
+
+subplot(2,2,4)
+semilogx(1:K,angle(cumsum(err_n,2)./[1:K;1:K])); hold on
+title("Phase(Average error) vs iteration");grid on;
+semilogx(1:K,repmat(angle(Bias_analytic(1:N)),1,K));
+% Organizing Legend
+leg2=[]; leg4=[];
+for ii=1:N
+    leg2 = [leg2; strcat("Phase Avg err r_",int2str(ii))];
+    leg4 = [leg4; strcat("Phase An. bias r_",int2str(ii))];
+end
+legend([leg2; leg4],"Location","Southwest");
 
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
