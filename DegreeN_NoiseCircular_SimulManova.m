@@ -159,34 +159,51 @@ for counter=1:NRUNS
         axis equal;grid on;
 
     else % Plots for investigation
-        % Plots
-        figs(1)=figure(1);       
-        subplot(1,3,1);
-        semilogx(abs(gamma),Gauss_test_HZ,'x');hold on;grid on;
-    %     semilogx(abs(Projection),Gauss_test_Roy,'x-');
-        yline(0.05,'r-');
-        semilogx([20 20],[0 1],'b--');
-        xlabel("|\gamma(z_0)|");ylabel("p-value of Henze-Zirkler's test");
-        title("Test for normality");
         
-        subplot(1,3,2);
-        semilogx(abs(gamma),MBox_p,'x');hold on;grid on;
-    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-        yline(0.05,'r-');
-        semilogx([8 8],[0 1],'b--');
-        xlabel("|\gamma(z_0)|");ylabel("pvalue of Box's M test");
-        title("Test for the covariance");
-        
-        subplot(1,3,3);
-        semilogx(abs(gamma),Manova_p,'x');hold on;grid on;
-    %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-        yline(0.05,'r-');
-        semilogx([3 3],[0 1],'b--');
-        xlabel("|\gamma(z_0)|");ylabel("pvalue of Manova test");
-        title("Test for the mean");
     end
 end
 
+%% Plots
+% for counter=1:NRUNS
+%     %[counter r(1:N) gamma Gauss_test_HZ MBox_p Manova_d Manova_p]
+%     gamma=dataset((counter-1)*SNR_nsteps+(1:SNR_nsteps),2+N);
+%     Gauss_test_HZ=dataset((counter-1)*SNR_nsteps+(1:SNR_nsteps),3+N);
+%     MBox_p=dataset((counter-1)*SNR_nsteps+(1:SNR_nsteps),4+N);
+%     Manova_d=dataset((counter-1)*SNR_nsteps+(1:SNR_nsteps),5+N);
+%     Manova_p=dataset((counter-1)*SNR_nsteps+(1:SNR_nsteps),6+N);
+%     r=dataset((counter-1)*SNR_nsteps+1,1+(1:N));
+%     figs(1)=figure(1);       
+%     subplot(1,3,1);
+%     semilogx(abs(gamma),Gauss_test_HZ,'x');hold on;grid on;
+% %     semilogx(abs(Projection),Gauss_test_Roy,'x-');
+%     yline(0.05,'r-');
+%     semilogx([36.9 36.9],[0 1],'b--');
+%     xlabel("|\gamma(z_0)|");ylabel("p-value of Henze-Zirkler's test");
+%     title("Test for normality");
+% 
+%     subplot(1,3,2);
+%     semilogx(abs(gamma),MBox_p,'x');hold on;grid on;
+% %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+%     yline(0.05,'r-');
+%     semilogx([22.4 22.4],[0 1],'b--');
+%     xlabel("|\gamma(z_0)|");ylabel("pvalue of Box's M test");
+%     title("Test for the covariance");
+% 
+%     subplot(1,3,3);
+%     semilogx(abs(gamma),Manova_p,'x');hold on;grid on;
+% %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
+%     yline(0.05,'r-');
+%     semilogx([4 4],[0 1],'b--');
+%     xlabel("|\gamma(z_0)|");ylabel("pvalue of Manova test");
+%     title("Test for the mean");
+% 
+%     figs(2)=figure(2);
+%     subplot(3,4,counter);
+%     viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
+%     plot(zeros(2,1),5*[-1,1],'b--','LineWidth',0.1);plot(5*[-1,1],zeros(2,1),'b--','LineWidth',0.1);
+%     plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
+%     axis equal;grid on;
+% end
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
 clear figs

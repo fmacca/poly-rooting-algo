@@ -15,7 +15,8 @@ results_folder=strcat(folder_name,'/',currDate);
 %% Load the dataset
 % Load the dataset from ProjectionAndOthers-MULTIPLE
 % [counter r1 r2 Projection Gauss_test_HZ HotT2_p]
-load('Results/Degree02_NoiseCircular_ProjectionAndOthers_MULTIPLETIMES/20210803T114355/dataset.mat');
+% load('Results/Degree02_NoiseCircular_ProjectionAndOthers_MULTIPLETIMES/20210803T114355/dataset.mat');
+load('Results/Degree02_NoiseFullMatrix_ProjectionAndOthers_MULTIPLETIMES/20210814T193417/dataset.mat');
 Projection = dataset(:,4);
 Gauss_test_HZ = dataset(:,5);
 HotT2_p = dataset(:,6);

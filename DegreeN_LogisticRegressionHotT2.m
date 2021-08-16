@@ -4,7 +4,7 @@ clc
 
 addpath('Resources') 
 %% Generate folder for results
-folder_name='Results/Degree02_LogisticRegressionManovaMean'; %Name for the results folder: it should be named after the kind of test performed
+folder_name='Results/DegreeN_LogisticRegressionHotT2'; %Name for the results folder: it should be named after the kind of test performed
 
 currDate = datestr(datetime,30);
 mkdir(folder_name,currDate);
@@ -14,25 +14,23 @@ results_folder=strcat(folder_name,'/',currDate);
 
 %% Load the dataset
 % Load the dataset from ProjectionAndOthers-MULTIPLE
-% [counter r1 r2 Projection Gauss_test_HZ MBox_p Manova_d Manova_p]
-% load('Results/Degree02_NoiseCircular_SimulManova/20210804T001827/dataset.mat');
-load('Results/Degree02_NoiseFullMatrix_SimulManova/20210815T010345/dataset.mat');
-Projection = dataset(:,4);
-Gauss_test_HZ = dataset(:,5);
-MBox_p = dataset(:,6);
-Manova_d = dataset(:,7);
-Manova_p = dataset(:,8);
+% [counter r(1:N) gamma Gauss_test_HZ HotT2_p]
+load('Results/DegreeN_NoiseCircular_ProjectionAndOthers_MULTIPLETIMES/20210813T172313/dataset.mat');
+N=7;
+gamma = dataset(:,2+N);
+Gauss_test_HZ = dataset(:,3+N);
+HotT2_p = dataset(:,4+N);
 
 
 %% Setting the model variables
-x = log(abs(Projection));
-t = (Manova_p >= 0.05);
+x = log(abs(gamma));
+t = (HotT2_p >= 0.05);
 
 %% Logistic regression
 t = t+1;
 [B, ~, stats] = mnrfit(x,t); % computes the weight matrix
 
-lev=0.45; %Model threshold
+lev=0.5; %Model threshold
 sep_line=(log((1-lev)./lev)-B(1))/B(2);
 exp(sep_line)
 
@@ -47,25 +45,25 @@ tpr=cm(2,2)/(cm(2,1)+cm(2,2)); %sensitivuty
 
 %% Plots
 figs(1)=figure(1);
-plot(x,Manova_p,'x'); hold on; grid on;
+plot(x,HotT2_p,'x'); hold on; grid on;
 % plot(x,t-1,'rx');
 yline(0.05,'r');
 plot(x,pihat(:,2),'r.');
 xline(sep_line,'b--');
-legend("P-value of MANOVA test","Level $\alpha=0.05$ for MANOVA test","Fitted model","Separating value $\overline{\gamma}_{MANOVA}$","Location","Northwest","interpreter","latex");
-title("MANOVA test");
-xlabel("log(|\gamma(z_0)|)");
+legend("P-value of Hotelling T$^2$ test","Level $\alpha=0.05$ for T$^2$ test","Fitted model","Separating value $\overline{\gamma}_{T^2}$","Location","Northwest","interpreter","latex");
+title("Hotelling T^2 test");
+xlabel("log(\gamma(z_0))");
 ylabel("Probability");
 hold off
 
 figs(2)=figure(2);
-plot(Manova_p,pihat(:,2),'x'); hold on; grid on;
+plot(HotT2_p,pihat(:,2),'x'); hold on; grid on;
 yline(lev,'b--');
 xline(0.05,'r');
-xlabel("P-value of MANOVA test");
+xlabel("P-value of Hotelling T^2 test");
 ylabel("Probability from fitted model");
-legend("Fitted vs actual","Chosen model threshold","Level $\alpha=0.05$ for MANOVA test","Location","Southeast","interpreter","latex")
-title("Logistic regression fitted probabilities vs MANOVA test P-values");
+legend("Fitted vs actual","Chosen model threshold","Level $\alpha=0.05$ for T$^2$ test","Location","Southeast","interpreter","latex")
+title("Logistic regression fitted probabilities vs T^2 test P-values");
 hold off
 
 figs(3)=figure(3); % ROC curve
