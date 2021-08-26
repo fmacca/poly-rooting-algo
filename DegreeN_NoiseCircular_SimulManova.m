@@ -3,15 +3,6 @@ close all
 clc
 
 addpath('Resources') 
-%% Generate folder for results
-folder_name='Results/DegreeN_NoiseCircular_SimulManova'; %Name for the results folder: it should be named after the kind of test performed
-
-currDate = datestr(datetime,30);
-mkdir(folder_name,currDate);
-results_folder=strcat(folder_name,'/',currDate);
-%All the figures we want to save should be added to the array of figures
-%through figs(1)=figure(1); figs(2)=figure(2);
-
 %% Parameters
 N=7; % order of the polynomial
 %sigma_a=.01; % variance of the noise on coefficients
@@ -20,12 +11,21 @@ SNRlin = 10.^(SNR/10); %(sqrt(1/SNRlin(isnr)))
 SNR_nsteps=numel(SNR);
 K=10^4;%10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
 K_normaltest=10^4; % Number of iterations to be used for normality test (since it cannot handle 10^5)
-scale=5; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
+scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 NRUNS=10;%20; % Number of times we generate a different polynomial
 
 plot_for_thesis=1; % 1 if we want the plots for the publication, 0 if we want the plots for investigation
 
 dataset=[];
+
+%% Generate folder for results
+folder_name=strcat('Results/Degree0',int2str(N),'_NoiseCircular_SimulManova');%'Results/DegreeN_NoiseCircular_SimulManova'; %Name for the results folder: it should be named after the kind of test performed
+
+currDate = datestr(datetime,30);
+mkdir(folder_name,currDate);
+results_folder=strcat(folder_name,'/',currDate);
+%All the figures we want to save should be added to the array of figures
+%through figs(1)=figure(1); figs(2)=figure(2);
 
 %%
 for counter=1:NRUNS
