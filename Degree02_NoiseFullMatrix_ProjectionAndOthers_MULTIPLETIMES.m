@@ -53,6 +53,8 @@ for counter=1:NRUNS
     Bias_simulated_tilda=zeros(2*N,SNR_nsteps);
     
     % Proposed indexes of goodness
+    Projection1=zeros(SNR_nsteps,1);
+    Projection2=zeros(SNR_nsteps,1);
     Projection=zeros(SNR_nsteps,1);
 
     Delta_exact=poly2D_discriminant(a);
@@ -73,10 +75,20 @@ for counter=1:NRUNS
         % I do things for the projection on orthogonal of [1;1]
     %     Malanobis=inv(MSE_analytic(1:N,1:N,ii)); % This is theMalanobis
     %     metric matrix, for computational reason we do not compute it
-        orth=null((MSE_analytic(1:N,1:N,ii)\[1;1])'); % Vector orthodonal to [1;1] in Malanobis metric
-        orth_norm=sqrt(orth'*(MSE_analytic(1:N,1:N,ii)\orth)); % Norm of the orthogonal vector
+%         orth=null((MSE_analytic(1:N,1:N,ii)\[1;1])'); % Vector orthodonal to [1;1] in Malanobis metric
+%         orth_norm=sqrt(orth'*(MSE_analytic(1:N,1:N,ii)\orth)); % Norm of the orthogonal vector
+%         
+%         Projection(ii)=1/orth_norm*orth'*(MSE_analytic(1:N,1:N,ii)\r);
+
+        orth=null((MSE_analytic(:,:,ii)\[1 0;1 0;0 1;0 1])'); % Vector orthodonal to [1;1] in Malanobis metric
+        orth_norm1=sqrt(1/2*orth(:,1)'*(MSE_analytic(:,:,ii)\orth(:,1))); % Norm of the orthogonal vector
+        orth(:,2)=null((MSE_analytic(:,:,ii)\[[1 0;1 0;0 1;0 1] orth(:,1)])');
+        orth_norm2=sqrt(1/2*orth(:,2)'*(MSE_analytic(:,:,ii)\orth(:,2)));
         
-        Projection(ii)=1/orth_norm*orth'*(MSE_analytic(1:N,1:N,ii)\r);
+        Projection1(ii)=1/2*1/orth_norm1*orth(:,1)'*(MSE_analytic(:,:,ii)\[r; conj(r)]);
+        Projection2(ii)=1/2*1/orth_norm2*orth(:,2)'*(MSE_analytic(:,:,ii)\[r; conj(r)]);
+        tmp=(1/orth_norm1*Projection1(ii)*orth(:,1)+1/orth_norm2*Projection2(ii)*orth(:,2));
+        Projection(ii)=sqrt(1/2*tmp'*(MSE_analytic(:,:,ii)\tmp));
 
         for k=1:K
             noise_tilda=sigma_a*A*randn(2*N,1); %Generate colored noise
@@ -111,7 +123,7 @@ for counter=1:NRUNS
         subplot(1,2,1);
         semilogx(abs(Projection),HotT2_p,'x');hold on;grid on;
     %     semilogx(abs(Projection),min(Ttest_p,[],2),'x-');
-        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'r-');
+        yline(0.05,'r-');
         semilogx([3 3],[0 1],'b--');
         xlabel("|\gamma(z_0)|");ylabel("p-value of Hotelling's T^2 test");
         title("Test for the mean");
@@ -119,7 +131,7 @@ for counter=1:NRUNS
         subplot(1,2,2);
         semilogx(abs(Projection),Gauss_test_HZ,'x');hold on;grid on;
     %     semilogx(abs(Projection),Gauss_test_Roy,'x-');
-        semilogx([min(abs(Projection)) max(abs(Projection))],[0.05 0.05],'r-');
+        yline(0.05,'r-');
         semilogx([20 20],[0 1],'b--');
         xlabel("|\gamma(z_0)|");ylabel("p-value of Henze-Zirkler's test");
         title("Test for normality");

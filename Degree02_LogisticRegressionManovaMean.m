@@ -16,7 +16,7 @@ results_folder=strcat(folder_name,'/',currDate);
 % Load the dataset from ProjectionAndOthers-MULTIPLE
 % [counter r1 r2 Projection Gauss_test_HZ MBox_p Manova_d Manova_p]
 % load('Results/Degree02_NoiseCircular_SimulManova/20210804T001827/dataset.mat');
-load('Results/Degree02_NoiseFullMatrix_SimulManova/20210815T010345/dataset.mat');
+load('Results/Degree02_NoiseFullMatrix_SimulManova/20210827T051151/dataset.mat');
 Projection = dataset(:,4);
 Gauss_test_HZ = dataset(:,5);
 MBox_p = dataset(:,6);
@@ -32,7 +32,8 @@ t = (Manova_p >= 0.05);
 t = t+1;
 [B, ~, stats] = mnrfit(x,t); % computes the weight matrix
 
-lev=0.45; %Model threshold
+% lev=0.45; %Model threshold
+lev=0.5; %Model threshold
 sep_line=(log((1-lev)./lev)-B(1))/B(2);
 exp(sep_line)
 

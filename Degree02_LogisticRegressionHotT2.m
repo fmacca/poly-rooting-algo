@@ -16,7 +16,7 @@ results_folder=strcat(folder_name,'/',currDate);
 % Load the dataset from ProjectionAndOthers-MULTIPLE
 % [counter r1 r2 Projection Gauss_test_HZ HotT2_p]
 % load('Results/Degree02_NoiseCircular_ProjectionAndOthers_MULTIPLETIMES/20210803T114355/dataset.mat');
-load('Results/Degree02_NoiseFullMatrix_ProjectionAndOthers_MULTIPLETIMES/20210814T193417/dataset.mat');
+load('Results/Degree02_NoiseFullMatrix_ProjectionAndOthers_MULTIPLETIMES/20210826T234157/dataset.mat');
 Projection = dataset(:,4);
 Gauss_test_HZ = dataset(:,5);
 HotT2_p = dataset(:,6);
@@ -31,7 +31,7 @@ t = t+1;
 [B, ~, stats] = mnrfit(x,t); % computes the weight matrix
 
 % lev=0.4; %Model threshold
-lev=0.5; %Model threshold
+lev=0.6; %Model threshold
 sep_line=(log((1-lev)./lev)-B(1))/B(2);
 exp(sep_line)
 
