@@ -79,7 +79,7 @@ for d=1:3:SNR_nsteps
 %     end
     plot(real(a),imag(a),'*k','MarkerSize',20);
     axis equal;axis(3*[-1,1,-1,1]);
-    title(strcat("Coefficients, SNR = ",num2str(SNR(d))));grid on;hold off
+    title(strcat("Coefficients, SNR = ",num2str(SNR(d)),"dB"));grid on;hold off
 
     subplot(2,D/3,D/3+(d-1)/3+1);
     viscircles([0 0],1,'color','b','linestyle','--','LineWidth',0.1);hold on;
@@ -94,20 +94,33 @@ for d=1:3:SNR_nsteps
     plot(real(r_mean(:,:,d)),imag(r_mean(:,:,d)),'.b','MarkerSize',15); % Mean of estimated roots
     plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
     axis equal;axis(2*[-1,1,-1,1]);
-    title(strcat("Roots, SNR = ",num2str(SNR(d))));grid on;hold off
+    title(strcat("Roots, SNR = ",num2str(SNR(d)),"dB"));grid on;hold off
 end
 
 figs(2)=figure(2);
 
 for ii=1:(2*N)
     for jj=ii:(2*N)
-        subplot(2*N,2*N,(ii-1)*2*N+jj)
-        semilogy(SNR,abs(reshape(MSE_analytic_tilda(ii,jj,:),SNR_nsteps,1)),'-');hold on;
-        semilogy(SNR,abs(reshape(MSE_simulated_tilda(ii,jj,:),SNR_nsteps,1)),'o--');
-        if(ii==1 &jj==1)
-            legend([ strcat("analytic"); strcat("simulated")],'Location','southwest');
+        if(~(ii==1 && jj==3) && ~(ii==2 && jj==4))    
+            subplot(2*N,2*N,(ii-1)*2*N+jj)
+            semilogy(SNR,abs(reshape(MSE_analytic_tilda(ii,jj,:),SNR_nsteps,1)),'-');hold on;
+            semilogy(SNR,abs(reshape(MSE_simulated_tilda(ii,jj,:),SNR_nsteps,1)),'o--');
+            ylim([10^(-5) 10]);
+            if(ii==1 & jj==1)
+                legend([ strcat("analytic"); strcat("simulated")],'Location','southwest');
+            end
+            title(strcat("$\widetilde{MSE}_{",int2str(ii),int2str(jj),"}$ vs SNR"), 'Interpreter', 'LaTeX');grid on;
         end
-        title(strcat("$\widetilde{MSE}_{",int2str(ii),int2str(jj),"}$ vs SNR"), 'Interpreter', 'LaTeX');grid on;
+%         if((ii==1 && jj==3) || (ii==2 && jj==4))    
+%             subplot(2*N,2*N,(ii-1)*2*N+jj)
+%             semilogy(SNR,abs(reshape(MSE_analytic_tilda(ii,jj,:),SNR_nsteps,1)),'-');hold on;
+%             semilogy(SNR,abs(reshape(MSE_simulated_tilda(ii,jj,:),SNR_nsteps,1)),'o--');hold on;
+%             ylim([10^(-7) 10]);
+%             if(ii==1 & jj==1)
+%                 legend([ strcat("analytic"); strcat("simulated")],'Location','southwest');
+%             end
+%             title(strcat("$\widetilde{MSE}_{",int2str(ii),int2str(jj),"}$ vs SNR"), 'Interpreter', 'LaTeX');grid on;
+%         end
     end
 end
 
