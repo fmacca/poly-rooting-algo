@@ -128,7 +128,7 @@ for d=1:D
         end
         axis equal;%axis([min(real(Delta_n(:,d,ii))),max(real(Delta_n(:,d,ii))),min(imag(Delta_n(:,d,ii))),max(imag(Delta_n(:,d,ii)))]);
 %         title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
-        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"dB"));grid on;hold off
     end
 end
 sgtitle("Discriminant distribution");
@@ -157,7 +157,7 @@ for d=1:D
         end
         axis equal;
 %         title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"; \Delta/\lambda =",num2str(discr_eig_ratio(d,ii))));grid on;hold off
-        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii))));grid on;hold off
+        title(strcat(color,"dist = ",num2str(distances(d)),"; SNR = ",int2str(SNR(ii)),"dB"));grid on;hold off
     end
 end
 sgtitle("Roots distributions");
@@ -258,7 +258,7 @@ for d=1:D
         loglog(1:K,abs(cumsum(err_n(1,:,d,ii),2))./repmat(1:K,1,1));
         title(strcat("Root 1, dist = ",num2str(distances(d))));grid on; hold on;
         if d==1
-            leg1=[leg1; strcat("SNR = ",int2str(SNR(ii)))];
+            leg1=[leg1; strcat("SNR = ",int2str(SNR(ii)),"dB")];
             legend(leg1,'Location','northeast');
         end
         
@@ -266,7 +266,7 @@ for d=1:D
         loglog(1:K,abs(cumsum(err_n(2,:,d,ii),2))./repmat(1:K,1,1));
         title(strcat("Root 2, dist = ",num2str(distances(d))));grid on; hold on;
         if d==1
-            leg2=[leg2; strcat("SNR = ",int2str(SNR(ii)))];
+            leg2=[leg2; strcat("SNR = ",int2str(SNR(ii)),"dB")];
             legend(leg2,'Location','northeast');
         end
 
