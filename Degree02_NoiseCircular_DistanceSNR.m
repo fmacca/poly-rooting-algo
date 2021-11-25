@@ -274,6 +274,38 @@ for d=1:D
 end
 sgtitle("Average error at each iteration");
 
+%%
+figs(8)=figure(8);
+
+
+    leg1=[]; leg2=[];
+    for ii=1:SNR_nsteps
+        subplot(2,2,1)
+        loglog(1:K,abs(cumsum(err_n(1,:,1,ii),2))./repmat(1:K,1,1));
+        title(strcat("Root 1, dist = ",num2str(distances(1))));grid on; hold on;
+            
+        leg1=[leg1; strcat("SNR = ",int2str(SNR(ii)),"dB")];
+        legend(leg1,'Location','northeast');
+        
+        subplot(2,2,3)
+        loglog(1:K,abs(cumsum(err_n(2,:,1,ii),2))./repmat(1:K,1,1));
+        title(strcat("Root 2, dist = ",num2str(distances(1))));grid on; hold on;
+
+        leg2=[leg2; strcat("SNR = ",int2str(SNR(ii)),"dB")];
+        legend(leg2,'Location','northeast');
+        
+        subplot(2,2,2)
+        loglog(1:K,abs(cumsum(err_n(1,:,D,ii),2))./repmat(1:K,1,1));
+        title(strcat("Root 1, dist = ",num2str(distances(D))));grid on; hold on;
+
+        subplot(2,2,4)
+        loglog(1:K,abs(cumsum(err_n(2,:,D,ii),2))./repmat(1:K,1,1));
+        title(strcat("Root 2, dist = ",num2str(distances(D))));grid on; hold on;
+
+    end
+
+sgtitle("Average error at each iteration");
+
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
 clear figs

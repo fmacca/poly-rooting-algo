@@ -1,3 +1,5 @@
+% File adapted to test the idea that things can be done using the
+% derivative
 clear all
 close all
 clc
@@ -26,17 +28,21 @@ r1=[scale*(2*rand(1,1)-1)+scale*1i*(2*rand(1,1)-1)];
 r=[r1; r1];
 % Compute corresponding noise-free polynomial cefficients
 a=conj(poly(r)');
+% Compute polynomial derivative
+a_der=1/2*polyder(a);
+r_der=roots(a_der);
 
-%% Compute the expected MSE matrix and bias from the analytic expression
+%% Compute the expected MSE matrix and bias from the analytic expression for the derivative
+Sigma_der=Sigma([1 3],[1,3]);
 % MSE matrix (complex augmented)
-MSE_analytic=mse_analytic(r,a,Sigma);
+MSE_analytic=mse_analytic(r_der,a_der,(1/4)*Sigma_der);
 % MSE matrix (real composite)
-J=[eye(N) 1i*eye(N);eye(N) -1i*eye(N)]; % Notation change matrix
+J=[eye(N-1) 1i*eye(N-1);eye(N-1) -1i*eye(N-1)]; % Notation change matrix
 MSE_analytic_tilda=1/4*J'*MSE_analytic*J;
-% bias (complex augmented)
-Bias_analytic=bias_analytic(r,a,Sigma);
-% bias (real composite)
-Bias_analytic_tilda=1/2*J'*Bias_analytic;
+% % bias (complex augmented)
+% Bias_analytic=bias_analytic(r,a,Sigma);
+% % bias (real composite)
+% Bias_analytic_tilda=1/2*J'*Bias_analytic;
 
 %% Simulation
 h = waitbar(0,'Simulations in progress ... Please wait...');
@@ -54,7 +60,13 @@ for k=1:K
 
     waitbar(k/K) %Update waitbar
 end
-r_mean = mean(r_n,2); %Mean of the roots computed at every iteration
+r_n_unord=[r_n(1,:) r_n(2,:)];
+err_n_unord=[err_n(1,:) err_n(2,:)];
+J_unord=[eye(N-1) 1i*eye(N-1);eye(N-1) -1i*eye(N-1)]; % Notation change matrix
+r_mean = mean(r_n_unord); %Mean of the roots computed at every iteration
+
+MSE_simulated=1/(2*K)*[err_n_unord; conj(err_n_unord)]*[err_n_unord; conj(err_n_unord)]';
+MSE_simulated_tilda=1/4*J_unord'*MSE_simulated*J_unord;
 
 close(h); %Close waitbar
 
@@ -83,9 +95,10 @@ for ii=1:N
 end
 % for ii=1:N
 % %     Ellipse_plot(0.1*inv(Cov_ztilda([ii N+ii],[ii N+ii])),[real(avgs(ii))-real(bias(ii)),imag(avgs(ii))-imag(bias(ii))])
-%     ellipse_plot(0.1*inv(MSE_analytic_tilda([ii N+ii],[ii N+ii])),[real(r(ii)),imag(r(ii))])
+ellipse_plot(0.1*inv(MSE_simulated_tilda),[real(r(1)),imag(r(1))])
+ellipse_plot(0.1*inv(MSE_analytic_tilda),[real(r(1)),imag(r(1))])
 % end
-% plot(real(r_mean),imag(r_mean),'.b','MarkerSize',15); % Mean of estimated roots
+plot(real(r_mean),imag(r_mean),'.b','MarkerSize',15); % Mean of estimated roots
 plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
 axis equal;axis(2*[-1,1,-1,1]);
 title("Roots");grid on;hold off
