@@ -17,7 +17,7 @@ results_folder=strcat(folder_name,'/',currDate);
 %% Parameters
 N=2; % order of the polynomial
 sigma_a=.01; % variance of the noise on coefficients
-K=10^4;%10^5; % Number of iterations per simulation (n of noisy measurements per polynomial)
+K=10^5;%10^4; % Number of iterations per simulation (n of noisy measurements per polynomial)
 scale=2; % the roots of the polynomial will be generated with Re(r),Im(r) in [-scale +scale], a square
 
 %% Generate Polynomial and Covariance matrix
@@ -131,6 +131,12 @@ plot(real(sqrtD),imag(sqrtD),'.','MarkerSize',1); hold on;
 % plot(real(r),imag(r),'*k','MarkerSize',20); % True roots
 axis equal;axis(1.5*[-1,1,-1,1]);
 title("Square root of discriminant");grid on;hold off
+
+%%
+figs(5)=figure(5);
+r_centered=[r_n(1,:)-r1; r_n(2,:)-r1];
+% plot(real(r_centered),imag(r_centered),'.','MarkerSize',1); hold on; % Centered roots
+histogram(angle(r_centered));
 
 %% Save workspace and figures to the folder
 savefig(figs,strcat(results_folder,'/figures.fig'),'compact');
