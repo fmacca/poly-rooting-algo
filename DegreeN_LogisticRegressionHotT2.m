@@ -4,26 +4,23 @@ clc
 
 addpath('Resources')
 %% Load the dataset
-% Load the dataset from ProjectionAndOthers-MULTIPLE
-% [counter r(1:N) gamma Gauss_test_HZ HotT2_p]
-% load('Results/Degree04_NoiseCircular_ProjectionAndOthers_MULTIPLETIMES/20210825T071145/dataset.mat');
-% N=4;
-% load('Results/Degree05_NoiseCircular_ProjectionAndOthers_MULTIPLETIMES/20210825T132142/dataset.mat');
-% N=5;
-load('Results/Degree07_NoiseCircular_ProjectionAndOthers_MULTIPLETIMES/20210826T032243/dataset.mat');
+% [counter r1 r2 Projection Gauss_test_HZ HotT2_p]
+folder_name='Results/Degree07_NoiseCircular_TestT2';
 N=7;
+
+load(strcat(folder_name,'/','dataset.mat'));
 gamma = dataset(:,2+N);
 Gauss_test_HZ = dataset(:,3+N);
 HotT2_p = dataset(:,4+N);
 
-%% Generate folder for results
-folder_name=strcat('Results/Degree0',int2str(N),'_LogisticRegressionHotT2'); %Name for the results folder: it should be named after the kind of test performed
+%% Set folder for results
 
 currDate = datestr(datetime,30);
-mkdir(folder_name,currDate);
-results_folder=strcat(folder_name,'/',currDate);
+mkdir(folder_name);
+results_folder=strcat(folder_name);
 %All the figures we want to save should be added to the array of figures
 %through figs(1)=figure(1); figs(2)=figure(2);
+
 
 %% Setting the model variables
 x = log(abs(gamma));
@@ -33,7 +30,7 @@ t = (HotT2_p >= 0.05);
 t = t+1;
 [B, ~, stats] = mnrfit(x,t); % computes the weight matrix
 
-lev=0.5; %Model threshold
+lev=0.4; %Model threshold
 sep_line=(log((1-lev)./lev)-B(1))/B(2);
 exp(sep_line)
 

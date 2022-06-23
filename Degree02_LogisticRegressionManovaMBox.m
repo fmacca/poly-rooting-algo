@@ -3,25 +3,25 @@ close all
 clc
 
 addpath('Resources') 
-%% Generate folder for results
-folder_name='Results/Degree02_LogisticRegressionManovaMBox'; %Name for the results folder: it should be named after the kind of test performed
-
-currDate = datestr(datetime,30);
-mkdir(folder_name,currDate);
-results_folder=strcat(folder_name,'/',currDate);
-%All the figures we want to save should be added to the array of figures
-%through figs(1)=figure(1); figs(2)=figure(2);
-
 %% Load the dataset
-% Load the dataset from ProjectionAndOthers-MULTIPLE
 % [counter r1 r2 Projection Gauss_test_HZ MBox_p Manova_d Manova_p]
-% load('Results/Degree02_NoiseCircular_SimulManova/20210804T001827/dataset.mat');
-load('Results/Degree02_NoiseFullMatrix_SimulManova/20210827T051151/dataset.mat');
+% folder_name='Results/Degree02_NoiseCircular_TestManova';
+folder_name='Results/Degree02_NoiseFullMatrix_TestManova';
+
+load(strcat(folder_name,'/','dataset.mat'));
 Projection = dataset(:,4);
 Gauss_test_HZ = dataset(:,5);
 MBox_p = dataset(:,6);
 Manova_d = dataset(:,7);
 Manova_p = dataset(:,8);
+
+%% Set folder for results
+
+currDate = datestr(datetime,30);
+mkdir(folder_name,'ManovaMBox');
+results_folder=strcat(folder_name,'/ManovaMBox');
+%All the figures we want to save should be added to the array of figures
+%through figs(1)=figure(1); figs(2)=figure(2);
 
 
 %% Setting the model variables
